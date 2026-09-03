@@ -1,69 +1,57 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { supabase } from '@/lib/supabase';
 
-export default function Home() {
+export const revalidate = 0; // Disable caching
+
+export default async function Home() {
+  const { data: modules, error } = await supabase
+    .from('modules')
+    .select('*')
+    .eq('is_active', true)
+    .order('name');
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg border border-gray-100">
+        <h1 className="text-2xl font-bold text-center text-gray-800 mb-2">
+          MAS Matrix
+        </h1>
+        <h2 className="text-md font-medium text-center text-gray-500 mb-8 uppercase tracking-wider">
+          Sewing Department
+        </h2>
+        
+        <div className="flex flex-col gap-4 mb-8">
+          <p className="text-sm font-medium text-gray-600 mb-2 text-center">Select Module</p>
+          {modules && modules.length > 0 ? (
+            modules.map((mod) => (
+              <Link 
+                key={mod.id} 
+                href={`/mark/${mod.id}`}
+                className="block p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-500 transition-all group"
+              >
+                <div className="flex justify-between items-center">
+                  <div className="font-semibold text-gray-800 group-hover:text-blue-700">{mod.name}</div>
+                  <div className="text-blue-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity">→</div>
+                </div>
+                {mod.responsible_leader && (
+                  <div className="text-xs text-gray-500 mt-1">Leader: {mod.responsible_leader}</div>
+                )}
+              </Link>
+            ))
+          ) : (
+            <p className="text-center text-gray-500 bg-gray-50 py-4 rounded border border-gray-200">No active modules. (Or database not connected)</p>
+          )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div className="pt-4 border-t border-gray-100 flex justify-between items-center text-sm">
+           <Link href="/status" className="text-blue-600 hover:text-blue-800 font-medium hover:underline">
+             View Daily Status
+           </Link>
+           <Link href="/admin" className="text-gray-400 hover:text-gray-600 font-medium">
+             Admin Login
+           </Link>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
