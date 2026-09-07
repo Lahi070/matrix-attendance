@@ -108,8 +108,8 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 p-4 md:p-8 font-sans pb-20">
-      <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+    <div className="min-h-screen bg-slate-950 p-4 md:p-8 font-sans pb-20 text-slate-200">
+      <div className="max-w-5xl mx-auto bg-slate-900 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden border border-slate-800">
         
         {/* Header */}
         <div className="bg-black p-6 md:px-10 md:py-8 text-white flex justify-between items-center relative overflow-hidden">
