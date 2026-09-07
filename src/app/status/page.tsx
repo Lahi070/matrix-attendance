@@ -1,90 +1,86 @@
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
+import { ArrowLeft, Activity, CheckCircle2, XCircle } from 'lucide-react';
 
 export const revalidate = 0;
 
-export default async function StatusPage() {
-  const today = new Date().toISOString().split('T')[0];
-
-  // Fetch all active modules
-  const { data: modules } = await supabase
-    .from('modules')
-    .select('*')
-    .eq('is_active', true)
-    .order('name');
-
-  // Fetch today's attendance records
-  const { data: attendance } = await supabase
-    .from('attendance')
-    .select('module_id, category, status')
-    .eq('date', today);
-
-  const attendanceRecords = attendance || [];
+export default async function DailyStatus() {
+  const { data: modules } = await supabase.from('modules').select('*').eq('is_active', true).order('name');
   
-  // Calculate module status (if there's any record for a module today, consider it marked)
-  const markedModuleIds = new Set(attendanceRecords.map(r => r.module_id));
+  const today = new Date().toISOString().split('T')[0];
+  const { data: attendance } = await supabase.from('attendance').select('module_id').eq('date', today);
 
-  // Calculate totals
-  const totals = {
-    'Planning leave': 0,
-    'Inform leave': 0,
-    'Not inform leave': 0,
-    'Dutypay': 0,
-    'Half day': 0,
-  };
+  // Group by module
+  const markedModules = new Set(attendance?.map(a => a.module_id));
 
-  attendanceRecords.forEach(record => {
-    if (record.status === 'Absent' && record.category) {
-      if (totals[record.category as keyof typeof totals] !== undefined) {
-        totals[record.category as keyof typeof totals]++;
-      }
-    }
-  });
+  const total = modules?.length || 0;
+  const marked = markedModules.size;
+  const pending = total - marked;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-        <div className="bg-blue-800 p-6 text-white flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold">Daily Status Report</h1>
-            <p className="opacity-80">Date: {new Date().toLocaleDateString()}</p>
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center py-12 px-4 font-sans">
+      <div className="max-w-3xl w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
+        
+        {/* Header */}
+        <div className="bg-slate-900 p-8 text-white flex justify-between items-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-48 h-48 bg-slate-800 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+          <div className="relative z-10">
+            <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
+              <Activity className="w-8 h-8 text-indigo-400" />
+              Daily Status
+            </h1>
+            <p className="text-slate-400 font-medium mt-1 tracking-wide">
+              {new Date().toLocaleDateString('en-GB')}
+            </p>
           </div>
-          <Link href="/" className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded transition-colors text-sm font-medium">
+          <Link href="/" className="relative z-10 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-lg transition-colors text-sm font-semibold flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" />
             Home
           </Link>
         </div>
 
-        <div className="p-6">
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Module Marking Status</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {modules?.map(mod => {
-                const isMarked = markedModuleIds.has(mod.id);
-                return (
-                  <div key={mod.id} className={`p-4 rounded-lg border flex justify-between items-center ${isMarked ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                    <div>
-                      <h3 className="font-bold text-gray-800">{mod.name}</h3>
-                      <p className="text-sm text-gray-600">Leader: {mod.responsible_leader || 'N/A'}</p>
-                    </div>
-                    <div className={`px-3 py-1 rounded-full text-sm font-bold ${isMarked ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
-                      {isMarked ? 'Completed' : 'Not Marked'}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+        <div className="p-8">
+          {/* Summary Cards */}
+          <div className="grid grid-cols-3 gap-4 mb-8">
+             <div className="bg-slate-50 p-4 rounded-xl text-center border border-slate-100">
+               <p className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-1">Total</p>
+               <h3 className="text-3xl font-black text-slate-800">{total}</h3>
+             </div>
+             <div className="bg-green-50 p-4 rounded-xl text-center border border-green-100">
+               <p className="text-sm font-bold text-green-600 uppercase tracking-wider mb-1">Completed</p>
+               <h3 className="text-3xl font-black text-green-700">{marked}</h3>
+             </div>
+             <div className="bg-red-50 p-4 rounded-xl text-center border border-red-100">
+               <p className="text-sm font-bold text-red-600 uppercase tracking-wider mb-1">Pending</p>
+               <h3 className="text-3xl font-black text-red-700">{pending}</h3>
+             </div>
           </div>
 
-          <div>
-            <h2 className="text-xl font-bold text-gray-800 mb-4 border-b pb-2">Overall Daily Totals</h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {Object.entries(totals).map(([category, count]) => (
-                <div key={category} className="bg-blue-50 border border-blue-100 p-4 rounded-lg text-center">
-                  <div className="text-3xl font-bold text-blue-600 mb-1">{count}</div>
-                  <div className="text-sm font-medium text-gray-600 leading-tight">{category}</div>
+          <h2 className="text-lg font-bold text-slate-800 mb-4 border-b border-slate-100 pb-2">Module Completion Status</h2>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {modules?.map(mod => {
+              const isMarked = markedModules.has(mod.id);
+              return (
+                <div key={mod.id} className={`p-4 rounded-xl border-2 flex items-center justify-between transition-colors ${
+                  isMarked 
+                    ? 'bg-green-50 border-green-200' 
+                    : 'bg-red-50 border-red-200'
+                }`}>
+                  <div>
+                    <div className={`font-bold ${isMarked ? 'text-green-900' : 'text-red-900'}`}>{mod.name}</div>
+                    <div className={`text-xs font-medium mt-0.5 ${isMarked ? 'text-green-600' : 'text-red-600'}`}>
+                      {mod.responsible_leader || 'No Leader'}
+                    </div>
+                  </div>
+                  {isMarked ? (
+                    <CheckCircle2 className="w-6 h-6 text-green-500" />
+                  ) : (
+                    <XCircle className="w-6 h-6 text-red-400" />
+                  )}
                 </div>
-              ))}
-            </div>
+              )
+            })}
           </div>
         </div>
       </div>
