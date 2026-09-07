@@ -112,8 +112,8 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
       <div className="max-w-5xl mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-200">
         
         {/* Header */}
-        <div className="bg-slate-900 p-6 md:px-10 md:py-8 text-white flex justify-between items-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-800 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="bg-black p-6 md:px-10 md:py-8 text-white flex justify-between items-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-800 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
           <div className="relative z-10">
             <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
               {moduleName}
@@ -128,49 +128,49 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
           </Link>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 md:p-10">
+        <form onSubmit={handleSubmit} className="p-6 md:p-10 bg-slate-900">
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-600 p-4 mb-8 rounded-r-lg shadow-sm flex items-start gap-3 animate-pulse">
-              <AlertCircle className="text-red-600 w-6 h-6 mt-0.5 shrink-0" />
+            <div className="bg-red-950/30 border-l-4 border-red-500 p-4 mb-8 rounded-r-lg shadow-sm flex items-start gap-3 animate-pulse">
+              <AlertCircle className="text-red-500 w-6 h-6 mt-0.5 shrink-0" />
               <div>
-                <h3 className="text-red-800 font-bold text-lg">Incomplete Submission</h3>
-                <p className="text-red-600 font-medium">{error}</p>
+                <h3 className="text-red-400 font-bold text-lg">Incomplete Submission</h3>
+                <p className="text-red-500 font-medium">{error}</p>
               </div>
             </div>
           )}
 
-          <div className="overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
+          <div className="overflow-x-auto rounded-xl border border-slate-800 shadow-sm bg-slate-950">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-slate-600 text-xs font-bold uppercase tracking-wider">
+                <tr className="bg-slate-950 border-b border-slate-800 text-slate-400 text-xs font-bold uppercase tracking-wider">
                   <th className="p-4 w-24">EPF</th>
                   <th className="p-4">Name</th>
                   <th className="p-4 text-center w-40">Status</th>
                   <th className="p-4 w-1/3">Absence Details</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-slate-800/50">
                 {members.map((member) => {
                   const record = attendance[member.id] || {};
                   const hasError = errorIds.has(member.id);
                   
                   return (
-                    <tr key={member.id} className={`transition-colors ${hasError ? 'bg-red-50' : 'hover:bg-slate-50'}`}>
-                      <td className="p-4 font-bold text-slate-800">
+                    <tr key={member.id} className={`transition-colors ${hasError ? 'bg-red-950/20' : 'hover:bg-slate-900/50'}`}>
+                      <td className="p-4 font-bold text-slate-200">
                         {member.epf}
                         {hasError && <AlertCircle className="w-4 h-4 text-red-500 inline ml-2" />}
                       </td>
-                      <td className="p-4 font-medium text-slate-600">
+                      <td className="p-4 font-medium text-slate-300">
                         {member.name}
-                        <div className="text-xs text-slate-400 font-normal mt-0.5">{member.gender}</div>
+                        <div className="text-xs text-slate-500 font-normal mt-0.5">{member.gender}</div>
                       </td>
                       
                       <td className="p-4">
                         <div className="flex gap-2 justify-center">
-                          <label className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-bold border-2 transition-all ${
+                          <label className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-bold border transition-all ${
                             record.status === 'Present' 
-                              ? 'bg-green-100 border-green-500 text-green-800 shadow-sm' 
-                              : hasError ? 'bg-white border-red-300 text-slate-500 hover:bg-slate-100' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-100 hover:border-slate-300'
+                              ? 'bg-green-950/40 border-green-500/50 text-green-400 shadow-sm' 
+                              : hasError ? 'bg-slate-950 border-red-500/50 text-slate-400 hover:bg-slate-900' : 'bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-900 hover:border-slate-700'
                           }`}>
                             <input 
                               type="radio" 
@@ -182,10 +182,10 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
                             />
                             Present
                           </label>
-                          <label className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-bold border-2 transition-all ${
+                          <label className={`cursor-pointer px-4 py-2 rounded-lg text-sm font-bold border transition-all ${
                             record.status === 'Absent' 
-                              ? 'bg-red-100 border-red-500 text-red-800 shadow-sm' 
-                              : hasError ? 'bg-white border-red-300 text-slate-500 hover:bg-slate-100' : 'bg-white border-slate-200 text-slate-500 hover:bg-slate-100 hover:border-slate-300'
+                              ? 'bg-red-950/40 border-red-500/50 text-red-400 shadow-sm' 
+                              : hasError ? 'bg-slate-950 border-red-500/50 text-slate-400 hover:bg-slate-900' : 'bg-slate-950 border-slate-800 text-slate-400 hover:bg-slate-900 hover:border-slate-700'
                           }`}>
                             <input 
                               type="radio" 
@@ -203,7 +203,7 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
                         {record.status === 'Absent' ? (
                           <div className="flex flex-col gap-2">
                             <select 
-                              className={`w-full border-2 rounded-lg p-2 text-sm focus:ring-slate-900 focus:border-slate-900 outline-none transition-colors font-medium ${(!record.category && hasError) ? 'border-red-400 bg-red-50 text-red-800' : 'border-slate-200 bg-white text-slate-700'}`}
+                              className={`w-full border rounded-lg p-2 text-sm focus:ring-slate-500 focus:border-slate-500 outline-none transition-colors font-medium ${(!record.category && hasError) ? 'border-red-500/50 bg-red-950/20 text-red-400' : 'border-slate-800 bg-slate-900 text-slate-300'}`}
                               value={record.category || ''}
                               onChange={(e) => handleCategoryChange(member.id, e.target.value)}
                             >
@@ -213,7 +213,7 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
 
                             {record.category && (
                               <select 
-                                className={`w-full border-2 rounded-lg p-2 text-sm focus:ring-slate-900 focus:border-slate-900 outline-none transition-colors font-medium ${(!record.reason_id && hasError) ? 'border-red-400 bg-red-50 text-red-800' : 'border-slate-200 bg-white text-slate-700'}`}
+                                className={`w-full border rounded-lg p-2 text-sm focus:ring-slate-500 focus:border-slate-500 outline-none transition-colors font-medium ${(!record.reason_id && hasError) ? 'border-red-500/50 bg-red-950/20 text-red-400' : 'border-slate-800 bg-slate-900 text-slate-300'}`}
                                 value={record.reason_id || ''}
                                 onChange={(e) => handleReasonChange(member.id, e.target.value)}
                               >
@@ -225,7 +225,7 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
                             )}
                           </div>
                         ) : (
-                          <div className="text-sm text-slate-300 italic px-2">N/A</div>
+                          <div className="text-sm text-slate-600 italic px-2">N/A</div>
                         )}
                       </td>
                     </tr>
@@ -239,7 +239,7 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
             <button 
               type="submit" 
               disabled={isSubmitting}
-              className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-10 rounded-xl shadow-lg transition-all disabled:opacity-50 flex items-center gap-2 text-lg active:scale-95"
+              className="bg-green-600 hover:bg-green-500 text-white font-bold py-4 px-10 rounded-xl shadow-lg transition-all disabled:opacity-50 flex items-center gap-2 text-lg active:scale-95"
             >
               {isSubmitting ? (
                 'Submitting...'
