@@ -4,33 +4,37 @@ import { supabase } from '@/lib/supabase';
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const epf = searchParams.get('epf');
-  const newModuleId = searchParams.get('module');
+  // 1. Add a test member
+  const testEpf = 'TEST-9999';
+  const { data: inserted, error: insertError } = await supabase
+    .from('team_members')
+    .insert([
+      { name: 'Test User', epf: testEpf, gender: 'Female', role: 'Team Member', module_id: 'a302a0c8-0836-4c5c-b1cf-c32846ceaaa3' } // using random module ID from seed
+    ])
+    .select();
 
-  if (!epf) {
-    const { data } = await supabase.from('team_members').select('id, name, epf, module_id').limit(5);
-    return NextResponse.json({ message: 'Provide epf and module params', sample: data });
+  if (insertError) {
+    return NextResponse.json({ step: 'INSERT', error: insertError });
   }
 
-  // Find member
-  const { data: member } = await supabase.from('team_members').select('*').eq('epf', epf).single();
-  if (!member) return NextResponse.json({ error: 'Member not found' });
+  // 2. Read the member
+  const { data: read, error: readError } = await supabase
+    .from('team_members')
+    .select('*')
+    .eq('epf', testEpf)
+    .single();
 
-  if (newModuleId) {
-    // Attempt update
-    const { data: updated, error } = await supabase
-      .from('team_members')
-      .update({ module_id: newModuleId })
-      .eq('id', member.id)
-      .select('*, modules(name)');
-      
-    return NextResponse.json({
-      action: 'UPDATE',
-      error,
-      updated
-    });
-  }
+  // 3. Delete the member
+  const { error: deleteError } = await supabase
+    .from('team_members')
+    .delete()
+    .eq('epf', testEpf);
 
-  return NextResponse.json({ member });
+  return NextResponse.json({
+    success: true,
+    message: 'Test completed: Inserted, Read, and Deleted successfully.',
+    inserted_record: inserted,
+    read_record: read,
+    delete_error: deleteError
+  });
 }
