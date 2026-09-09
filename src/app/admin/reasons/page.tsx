@@ -20,12 +20,19 @@ export default function ManageReasons() {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!reasonText) return;
-    const { error } = await supabase.from('absence_reasons').insert([{ category, reason_text: reasonText }]);
-    if (!error) {
+    const { data, error } = await supabase
+      .from('absence_reasons')
+      .insert([{ category, reason_text: reasonText }])
+      .select();
+      
+    if (!error && data && data.length > 0) {
       setReasonText('');
-      fetchReasons();
+      setReasons(prev => {
+        const newArray = [...prev, data[0]];
+        return newArray.sort((a, b) => a.category.localeCompare(b.category) || a.reason_text.localeCompare(b.reason_text));
+      });
     } else {
-      alert(error.message);
+      alert(error?.message || 'Error: RLS policy blocked the insert.');
     }
   };
 
