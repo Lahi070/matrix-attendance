@@ -13,6 +13,12 @@ export default function MembersPage() {
   const [epf, setEpf] = useState('');
   const [gender, setGender] = useState('Female');
   const [role, setRole] = useState('Team Member');
+  const [workerType, setWorkerType] = useState('Direct');
+
+  useEffect(() => {
+    if (role === 'Team Member') setWorkerType('Direct');
+    else setWorkerType('Indirect');
+  }, [role]);
   const [moduleId, setModuleId] = useState('');
   const [isAdding, setIsAdding] = useState(false);
 
@@ -51,7 +57,7 @@ export default function MembersPage() {
     setIsAdding(true);
     
     const { error, data } = await supabase.from('team_members').insert([
-      { name, epf, gender, role, module_id: moduleId }
+      { name, epf, gender, role, module_id: moduleId, worker_type: workerType }
     ]).select('*, modules(name)');
     
     setIsAdding(false);
@@ -294,3 +300,4 @@ export default function MembersPage() {
     </div>
   );
 }
+

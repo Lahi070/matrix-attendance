@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
 type Module = { id: string; name: string; responsible_leader: string; is_active: boolean };
 
@@ -108,3 +109,4 @@ export default function ManageModules() {
     </div>
   );
 }
+
