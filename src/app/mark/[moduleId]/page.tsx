@@ -17,10 +17,25 @@ export default async function MarkAttendancePage({ params }: { params: { moduleI
     return notFound();
   }
 
+  const { data: members } = await supabase
+    .from('team_members')
+    .select('id, name, epf, gender')
+    .eq('module_id', moduleId)
+    .order('epf');
+
+  const { data: reasons } = await supabase
+    .from('absence_reasons')
+    .select('*');
+
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col items-center py-12 px-4 font-sans text-slate-200">
       <div className="max-w-4xl w-full">
-        <AttendanceForm module={moduleData} />
+        <AttendanceForm 
+          moduleId={moduleData.id}
+          moduleName={moduleData.name}
+          members={members || []}
+          reasons={reasons || []}
+        />
       </div>
     </div>
   );
