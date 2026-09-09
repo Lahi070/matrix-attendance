@@ -76,13 +76,17 @@ export default function MembersPage() {
   const handleTransfer = async () => {
     if (!foundMember || !transferModuleId) return;
     
-    const { error } = await supabase
+    const { error, data } = await supabase
       .from('team_members')
       .update({ module_id: transferModuleId })
-      .eq('id', foundMember.id);
+      .eq('id', foundMember.id)
+      .select();
 
     if (error) {
-      setTransferMessage('Error updating member.');
+      console.error('Update error:', error);
+      setTransferMessage(`Error updating member: ${error.message}`);
+    } else if (!data || data.length === 0) {
+      setTransferMessage('Error: RLS policy blocked the update or member not found.');
     } else {
       setTransferMessage('Member transferred successfully!');
       setFoundMember(null);
