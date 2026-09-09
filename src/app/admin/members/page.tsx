@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { Search, ArrowRightLeft, CheckCircle2, UserCircle, Plus } from 'lucide-react';
+import { Search, ArrowRightLeft, CheckCircle2, UserCircle, Plus, Trash2 } from 'lucide-react';
 
 export default function MembersPage() {
   const [members, setMembers] = useState<any[]>([]);
@@ -22,6 +22,7 @@ export default function MembersPage() {
   const [transferModuleId, setTransferModuleId] = useState('');
   const [transferMessage, setTransferMessage] = useState('');
   const [isSearching, setIsSearching] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -97,6 +98,31 @@ export default function MembersPage() {
     }
   };
 
+  const handleDelete = async () => {
+    if (!foundMember) return;
+    if (!window.confirm(`Are you sure you want to permanently delete ${foundMember.name} (EPF: ${foundMember.epf})?`)) return;
+    
+    setIsDeleting(true);
+    const { error } = await supabase
+      .from('team_members')
+      .delete()
+      .eq('id', foundMember.id);
+      
+    setIsDeleting(false);
+
+    if (error) {
+      console.error('Delete error:', error);
+      setTransferMessage(`Error deleting member: ${error.message}`);
+    } else {
+      setTransferMessage('Member deleted successfully!');
+      setFoundMember(null);
+      setSearchEpf('');
+      
+      // Remove from local state
+      setMembers(prev => prev.filter(m => m.id !== foundMember.id));
+    }
+  };
+
   return (
     <div className="space-y-8 font-sans">
       <div>
@@ -157,10 +183,14 @@ export default function MembersPage() {
                     <option key={mod.id} value={mod.id}>{mod.name}</option>
                   ))}
                 </select>
-                <button onClick={handleTransfer} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors text-sm shadow-sm">
-                  <CheckCircle2 className="w-4 h-4" />
-                  Transfer
-                </button>
+                  <button onClick={handleTransfer} className="bg-green-600 hover:bg-green-700 text-white px-6 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors text-sm shadow-sm whitespace-nowrap">
+                    <CheckCircle2 className="w-4 h-4" />
+                    Transfer
+                  </button>
+                  <button onClick={handleDelete} disabled={isDeleting} className="bg-red-600 hover:bg-red-700 text-white px-6 py-2.5 rounded-lg font-bold flex items-center justify-center gap-2 transition-colors text-sm shadow-sm whitespace-nowrap disabled:opacity-50">
+                    <Trash2 className="w-4 h-4" />
+                    {isDeleting ? 'Deleting...' : 'Delete'}
+                  </button>
               </div>
             </div>
           )}
