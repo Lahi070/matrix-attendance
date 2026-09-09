@@ -31,7 +31,17 @@ export default function MembersPage() {
   const fetchData = async () => {
     const { data: mData } = await supabase.from('team_members').select('*, modules(name)');
     const { data: modData } = await supabase.from('modules').select('*').order('name');
-    if (mData) setMembers(mData);
+    if (mData) {
+      const sorted = mData.sort((a, b) => {
+        const epfA = parseInt(a.epf, 10);
+        const epfB = parseInt(b.epf, 10);
+        if (isNaN(epfA) && isNaN(epfB)) return a.epf.localeCompare(b.epf);
+        if (isNaN(epfA)) return 1;
+        if (isNaN(epfB)) return -1;
+        return epfA - epfB;
+      });
+      setMembers(sorted);
+    }
     if (modData) setModules(modData);
   };
 
