@@ -39,16 +39,16 @@ export default function MembersPage() {
     if (!name || !epf || !moduleId) return;
     setIsAdding(true);
     
-    const { error } = await supabase.from('team_members').insert([
+    const { error, data } = await supabase.from('team_members').insert([
       { name, epf, gender, role, module_id: moduleId }
-    ]);
+    ]).select('*, modules(name)');
     
     setIsAdding(false);
-    if (!error) {
+    if (!error && data) {
       setName(''); setEpf('');
-      fetchData();
+      setMembers(prev => [data[0], ...prev]);
     } else {
-      alert(error.message);
+      alert(error?.message || 'Error adding member');
     }
   };
 
@@ -80,7 +80,7 @@ export default function MembersPage() {
       .from('team_members')
       .update({ module_id: transferModuleId })
       .eq('id', foundMember.id)
-      .select();
+      .select('*, modules(name)');
 
     if (error) {
       console.error('Update error:', error);
@@ -91,7 +91,9 @@ export default function MembersPage() {
       setTransferMessage('Member transferred successfully!');
       setFoundMember(null);
       setSearchEpf('');
-      fetchData(); // Refresh list
+      
+      // Update local state to avoid Next.js aggressive fetch caching
+      setMembers(prev => prev.map(m => m.id === data[0].id ? data[0] : m));
     }
   };
 
