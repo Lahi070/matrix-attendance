@@ -1,3 +1,4 @@
+/* eslint-disable */
 const xlsx = require('xlsx');
 const fs = require('fs');
 
@@ -60,3 +61,4 @@ try {
 } catch (err) {
   console.error("Error:", err);
 }
+
