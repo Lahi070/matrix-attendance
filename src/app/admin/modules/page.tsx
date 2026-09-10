@@ -93,10 +93,13 @@ export default function ManageModules() {
                     {mod.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </td>
-                <td className="p-4 text-right">
+                <td className="p-4 text-right flex justify-end gap-2 items-center">
+                  <Link href={`/admin/modules/${mod.id}`} className="px-3 py-1 text-sm rounded font-bold text-blue-600 hover:bg-blue-50 border border-blue-200 hover:border-blue-300 transition-colors">
+                    Edit
+                  </Link>
                   <button 
                     onClick={() => toggleStatus(mod.id, mod.is_active)}
-                    className={`px-3 py-1 text-sm rounded ${mod.is_active ? 'text-red-600 hover:bg-red-50' : 'text-green-600 hover:bg-green-50'}`}
+                    className={`px-3 py-1 text-sm rounded font-bold border transition-colors ${mod.is_active ? 'text-red-600 hover:bg-red-50 border-red-200 hover:border-red-300' : 'text-green-600 hover:bg-green-50 border-green-200 hover:border-green-300'}`}
                   >
                     {mod.is_active ? 'Deactivate' : 'Activate'}
                   </button>
@@ -109,4 +112,5 @@ export default function ManageModules() {
     </div>
   );
 }
+
 
