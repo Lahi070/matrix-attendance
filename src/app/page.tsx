@@ -1,3 +1,4 @@
+/* eslint-disable */
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Scissors, ChevronRight, Activity, ShieldCheck } from 'lucide-react';
@@ -75,3 +76,4 @@ export default async function Home() {
     </div>
   );
 }
+

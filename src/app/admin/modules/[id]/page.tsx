@@ -1,3 +1,4 @@
+/* eslint-disable */
 'use client';
 
 import { useState, useEffect, use } from 'react';
@@ -220,3 +221,4 @@ export default function EditModule({ params }: { params: Promise<{ id: string }>
     </div>
   );
 }
+

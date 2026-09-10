@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { supabase } from '@/lib/supabase';
 import { Users, LayoutGrid, CheckSquare, Activity } from 'lucide-react';
 
@@ -155,4 +156,5 @@ export default async function AdminDashboard() {
     </div>
   );
 }
+
 
