@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 
 export default function ManageReasons() {
-  const [reasons, setReasons] = useState<any[]>([]);
   const [category, setCategory] = useState('Inform leave');
   const [reasonText, setReasonText] = useState('');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [reasons, setReasons] = useState<any[]>([]);
 
   const categories = ['Planning leave', 'Inform leave', 'Not inform leave', 'Dutypay', 'Half day'];
 
@@ -15,7 +16,10 @@ export default function ManageReasons() {
     if (data) setReasons(data);
   };
 
-  useEffect(() => { fetchReasons(); }, []);
+  useEffect(() => { 
+    fetchReasons(); 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();

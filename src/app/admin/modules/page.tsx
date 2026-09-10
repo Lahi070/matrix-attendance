@@ -12,16 +12,17 @@ export default function ManageModules() {
   const [leader, setLeader] = useState('');
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchModules();
-  }, []);
-
   const fetchModules = async () => {
     setLoading(true);
     const { data } = await supabase.from('modules').select('*').order('name');
     if (data) setModules(data);
     setLoading(false);
   };
+
+  useEffect(() => {
+    fetchModules();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();

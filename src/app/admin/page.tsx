@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import { Users, LayoutGrid, CheckSquare, Settings, Activity } from 'lucide-react';
+import { Users, LayoutGrid, CheckSquare, Activity } from 'lucide-react';
 
 export const revalidate = 0;
 
@@ -155,3 +155,4 @@ export default async function AdminDashboard() {
     </div>
   );
 }
+
