@@ -26,16 +26,29 @@ export default function UploadCadrePage() {
   };
 
   const mapGender = (gender: string) => {
-    if (gender === 'Male' || gender === 'Female') return gender;
+    if (!gender) return 'Female';
+    if (gender.toLowerCase().includes('male') && !gender.toLowerCase().includes('female')) return 'Male';
     return 'Female';
   };
+
+  const getColVal = (row: any, ...keys: string[]) => {
+    const rowKeys = Object.keys(row);
+    for (const key of keys) {
+      if (row[key] !== undefined) return row[key];
+      const match = rowKeys.find(rk => rk.toLowerCase().replace(/\s/g, '') === key.toLowerCase().replace(/\s/g, ''));
+      if (match) return row[match];
+    }
+    return null;
+  };
+
+  const excludedModules = ['fcdc', 'lto', 'outsource', 'washing'];
 
   const handleUpload = async () => {
     if (!file) return;
     setLoading(true);
     setSuccess(false);
     setLogs([]);
-    addLog(`Starting upload for ${file.name}...`);
+    addLog(\Starting upload for \...\);
 
     try {
       const dataBuffer = await file.arrayBuffer();
@@ -44,76 +57,104 @@ export default function UploadCadrePage() {
       const sheet = workbook.Sheets[sheetName];
       const rows = XLSX.utils.sheet_to_json<any>(sheet);
 
-      addLog(`Found ${rows.length} rows in the Excel sheet.`);
+      addLog(\Found \ rows in the Excel sheet.\);
 
       // 1. Get existing modules
       const { data: existingModules } = await supabase.from('modules').select('id, name');
       const moduleMap: Record<string, string> = {};
       existingModules?.forEach(m => {
-        moduleMap[m.name] = m.id;
+        moduleMap[m.name.trim().toLowerCase()] = m.id;
       });
 
-      // 2. Extract unique modules from Excel and create missing ones
-      const excelModules = [...new Set(rows.map(r => r['New Module']).filter(Boolean))];
+      // 2. Process valid rows
+      const validRows = [];
+      for (const row of rows) {
+        const epf = getColVal(row, 'EPF', 'EmpNo', 'ID');
+        const name = getColVal(row, 'Name', 'FullName', 'EmpName', 'EmployeeName');
+        const mod = getColVal(row, 'NewModule', 'Module', 'Department', 'New Module');
+        const desig = getColVal(row, 'Designation', 'Role', 'Position');
+        const gender = getColVal(row, 'Gender', 'Sex');
+
+        if (!epf || !name || !mod) continue;
+
+        const modNameStr = String(mod).trim();
+        const modNameLower = modNameStr.toLowerCase();
+
+        // Skip excluded modules
+        let isExcluded = false;
+        for (const ex of excludedModules) {
+          if (modNameLower.includes(ex)) {
+            isExcluded = true;
+            break;
+          }
+        }
+        if (isExcluded) continue;
+
+        validRows.push({
+          epf: String(epf).trim(),
+          name: String(name).trim(),
+          modName: modNameStr,
+          modNameLower,
+          gender: String(gender || ''),
+          desig: String(desig || '')
+        });
+      }
+
+      addLog(\Found \ valid members after ignoring unneeded modules.\);
+
+      // 3. Create missing modules
+      const excelModules = [...new Set(validRows.map(r => r.modName))];
       for (const modName of excelModules) {
-        if (!moduleMap[modName as string]) {
-          addLog(`Creating new module: ${modName}`);
+        const lower = modName.toLowerCase();
+        if (!moduleMap[lower]) {
+          addLog(\Creating new module: \\);
           const { data: newMod } = await supabase.from('modules').insert({ name: modName, is_active: true }).select('id').single();
-          if (newMod) moduleMap[modName as string] = newMod.id;
+          if (newMod) moduleMap[lower] = newMod.id;
         }
       }
 
-      // 3. Get existing members by EPF
+      // 4. Get existing members by EPF
       const { data: existingMembers } = await supabase.from('team_members').select('id, epf');
       const epfMap: Record<string, string> = {};
       existingMembers?.forEach(m => {
         epfMap[m.epf] = m.id;
       });
 
-      // 4. Process rows
+      // 5. Upsert rows
       let updated = 0;
       let inserted = 0;
 
-      for (let i = 0; i < rows.length; i++) {
-        const row = rows[i];
-        if (!row.EPF || !row.Name || !row['New Module']) continue;
-
-        const epf = String(row.EPF).trim();
-        const name = String(row.Name).trim();
-        const gender = mapGender(row.Gender);
-        const role = mapRole(row.Designation);
-        const moduleId = moduleMap[row['New Module']];
-
+      for (let i = 0; i < validRows.length; i++) {
+        const r = validRows[i];
+        const moduleId = moduleMap[r.modNameLower];
         if (!moduleId) continue;
 
         const payload = {
-          name,
-          epf,
-          gender,
-          role,
+          name: r.name,
+          epf: r.epf,
+          gender: mapGender(r.gender),
+          role: mapRole(r.desig),
           module_id: moduleId
         };
 
-        if (epfMap[epf]) {
-          // Update
-          await supabase.from('team_members').update(payload).eq('epf', epf);
+        if (epfMap[r.epf]) {
+          await supabase.from('team_members').update(payload).eq('epf', r.epf);
           updated++;
         } else {
-          // Insert
           await supabase.from('team_members').insert(payload);
           inserted++;
         }
 
         if (i % 10 === 0) {
-          setProgress(Math.round((i / rows.length) * 100));
+          setProgress(Math.round((i / validRows.length) * 100));
         }
       }
 
       setProgress(100);
-      addLog(`Successfully inserted ${inserted} and updated ${updated} members!`);
+      addLog(\Successfully inserted \ and updated \ members!\);
       setSuccess(true);
     } catch (err: any) {
-      addLog(`ERROR: ${err.message}`);
+      addLog(\ERROR: \\);
     }
 
     setLoading(false);
@@ -157,7 +198,7 @@ export default function UploadCadrePage() {
         {loading && (
           <div className="mb-6">
             <div className="w-full bg-slate-200 rounded-full h-2.5 mb-2">
-              <div className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+              <div className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style={{ width: \\%\ }}></div>
             </div>
             <p className="text-xs text-slate-500 text-right">{progress}% completed</p>
           </div>
