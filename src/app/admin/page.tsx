@@ -1,6 +1,7 @@
 /* eslint-disable */
 import { supabase } from '@/lib/supabase';
-import { Users, LayoutGrid, CheckSquare, Activity } from 'lucide-react';
+import { Users, LayoutGrid, CheckSquare, Activity, UploadCloud } from 'lucide-react';
+import ManualPercentageCard from './ManualPercentageCard';
 
 export const revalidate = 0;
 
@@ -45,20 +46,27 @@ export default async function AdminDashboard() {
 
   return (
     <div className="space-y-8 font-sans pb-10">
-      <div>
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard Summary</h1>
-        <p className="text-slate-500 font-medium mt-1">Matrix Sewing Department System Status</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Dashboard Summary</h1>
+          <p className="text-slate-500 font-medium mt-1">Matrix Sewing Department System Status</p>
+        </div>
+        <a href="/admin/upload" className="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg font-bold shadow-md shadow-indigo-600/20 flex items-center gap-2 transition-colors">
+          <UploadCloud className="w-5 h-5" />
+          Upload Cadre
+        </a>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        <div className="bg-slate-900 text-white p-6 rounded-2xl shadow-lg relative overflow-hidden group">
-          <div className="absolute right-0 top-0 w-24 h-24 bg-white/10 rounded-bl-full -z-10 group-hover:scale-110 transition-transform"></div>
-          <div className="flex justify-between items-start z-10 relative">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-6">
+        <ManualPercentageCard dbTotal={memberCount || 0} totalAbsent={totalAbsent} />
+
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+          <div className="flex justify-between items-start">
             <div>
-              <p className="text-slate-300 text-sm font-bold uppercase tracking-wider mb-1">Total Members</p>
-              <h3 className="text-4xl font-black">{memberCount || 0}</h3>
+              <p className="text-slate-500 text-sm font-bold uppercase tracking-wider mb-1">Total Members</p>
+              <h3 className="text-3xl font-black text-slate-800">{memberCount || 0}</h3>
             </div>
-            <div className="bg-white/20 p-3 rounded-xl"><Users className="w-6 h-6 text-white" /></div>
+            <div className="bg-blue-50 p-3 rounded-xl"><Users className="w-6 h-6 text-blue-600" /></div>
           </div>
         </div>
 
