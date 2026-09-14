@@ -35,7 +35,7 @@ export default function UploadCadrePage() {
     setLoading(true);
     setSuccess(false);
     setLogs([]);
-    addLog(Starting upload for ...);
+    addLog(`Starting upload for ${file.name}...`);
 
     try {
       const dataBuffer = await file.arrayBuffer();
@@ -44,7 +44,7 @@ export default function UploadCadrePage() {
       const sheet = workbook.Sheets[sheetName];
       const rows = XLSX.utils.sheet_to_json<any>(sheet);
 
-      addLog(Found  rows in the Excel sheet.);
+      addLog(`Found ${rows.length} rows in the Excel sheet.`);
 
       // 1. Get existing modules
       const { data: existingModules } = await supabase.from('modules').select('id, name');
@@ -57,7 +57,7 @@ export default function UploadCadrePage() {
       const excelModules = [...new Set(rows.map(r => r['New Module']).filter(Boolean))];
       for (const modName of excelModules) {
         if (!moduleMap[modName as string]) {
-          addLog(Creating new module: );
+          addLog(`Creating new module: ${modName}`);
           const { data: newMod } = await supabase.from('modules').insert({ name: modName, is_active: true }).select('id').single();
           if (newMod) moduleMap[modName as string] = newMod.id;
         }
@@ -110,10 +110,10 @@ export default function UploadCadrePage() {
       }
 
       setProgress(100);
-      addLog(Successfully inserted  and updated  members!);
+      addLog(`Successfully inserted ${inserted} and updated ${updated} members!`);
       setSuccess(true);
     } catch (err: any) {
-      addLog(ERROR: );
+      addLog(`ERROR: ${err.message}`);
     }
 
     setLoading(false);
