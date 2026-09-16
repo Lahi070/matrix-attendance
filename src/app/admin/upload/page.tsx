@@ -112,13 +112,16 @@ export default function UploadCadrePage() {
         const lower = modName.toLowerCase();
         if (!moduleMap[lower]) {
           addLog(`Creating new module: ${modName}`);
-          const { data: newMod } = await supabase.from('modules').insert({ name: modName, is_active: true }).select('id').single();
+          const { data: newMod, error } = await supabase.from('modules').insert({ name: modName, is_active: true }).select('id').single();
+          if (error) throw new Error(`Module create error: ${error.message}`);
           if (newMod) moduleMap[lower] = newMod.id;
         }
       }
 
       // 4. Get existing members by EPF
-      const { data: existingMembers } = await supabase.from('team_members').select('id, epf');
+      const { data: existingMembers, error: membersErr } = await supabase.from('team_members').select('id, epf');
+      if (membersErr) throw new Error(`Fetch members error: ${membersErr.message}`);
+      
       const epfMap: Record<string, string> = {};
       const membersToDelete: string[] = [];
 
@@ -137,9 +140,11 @@ export default function UploadCadrePage() {
           const batch = membersToDelete.slice(i, i + 100);
           const batchIds = existingMembers?.filter(m => batch.includes(m.epf)).map(m => m.id) || [];
           if (batchIds.length > 0) {
-            await supabase.from('attendance').delete().in('member_id', batchIds);
+            const { error: attErr } = await supabase.from('attendance').delete().in('member_id', batchIds);
+            if (attErr) throw new Error(`Delete attendance error: ${attErr.message}`);
           }
-          await supabase.from('team_members').delete().in('epf', batch);
+          const { error: delErr } = await supabase.from('team_members').delete().in('epf', batch);
+          if (delErr) throw new Error(`Delete members error: ${delErr.message}`);
         }
         addLog(`Successfully removed old members.`);
       }
@@ -162,10 +167,12 @@ export default function UploadCadrePage() {
         };
 
         if (epfMap[r.epf]) {
-          await supabase.from('team_members').update(payload).eq('epf', r.epf);
+          const { error: updErr } = await supabase.from('team_members').update(payload).eq('epf', r.epf);
+          if (updErr) throw new Error(`Update member error: ${updErr.message}`);
           updated++;
         } else {
-          await supabase.from('team_members').insert(payload);
+          const { error: insErr } = await supabase.from('team_members').insert(payload);
+          if (insErr) throw new Error(`Insert member error: ${insErr.message}`);
           inserted++;
         }
 
@@ -183,8 +190,10 @@ export default function UploadCadrePage() {
         const emptyMods = allMods.filter(m => !activeModuleIds.has(m.id));
         if (emptyMods.length > 0) {
           const emptyIds = emptyMods.map(m => m.id);
-          await supabase.from('attendance').delete().in('module_id', emptyIds);
-          await supabase.from('modules').delete().in('id', emptyIds);
+          const { error: errA } = await supabase.from('attendance').delete().in('module_id', emptyIds);
+          if (errA) throw new Error(`Cleanup att error: ${errA.message}`);
+          const { error: errM } = await supabase.from('modules').delete().in('id', emptyIds);
+          if (errM) throw new Error(`Cleanup mod error: ${errM.message}`);
           addLog(`Removed ${emptyMods.length} empty modules.`);
         }
       }
