@@ -27,11 +27,12 @@ export default function UploadCadrePage() {
   };
 
   const mapGender = (gender: string) => {
-    if (!gender) return 'Female';
-    const g = gender.toLowerCase();
-    if (g.includes('n/a') || g === 'na') return 'N/A';
-    if (g.includes('male') && !g.includes('female')) return 'Male';
-    return 'Female';
+    if (!gender || gender.trim() === '') return 'N/A';
+    const g = gender.toLowerCase().trim();
+    if (g === 'n/a' || g === 'na' || g === '-' || g === 'n/ a') return 'N/A';
+    if (g === 'm' || g === 'male') return 'Male';
+    if (g === 'f' || g === 'female') return 'Female';
+    return 'N/A';
   };
 
   const getColVal = (row: any, ...keys: string[]) => {
@@ -96,13 +97,21 @@ export default function UploadCadrePage() {
         if (isExcluded) continue;
 
         const cleanEpf = String(epf).trim();
+        const rawGender = gender !== null && gender !== undefined ? String(gender).trim() : '';
+        const rawDesig = desig !== null && desig !== undefined ? String(desig).trim() : '';
+        
+        // Log first few for debugging
+        if (validRows.length < 5) {
+          addLog(`[DEBUG] EPF=${cleanEpf} Name=${name} rawGender="${rawGender}" mapped="${mapGender(rawGender)}" rawDesig="${rawDesig}"`);
+        }
+
         validRows.push({
           epf: cleanEpf,
           name: String(name).trim(),
           modName: modNameStr,
           modNameLower,
-          gender: String(gender || ''),
-          desig: String(desig || '')
+          gender: rawGender,
+          desig: rawDesig
         });
         excelEpfs.add(cleanEpf);
       }
