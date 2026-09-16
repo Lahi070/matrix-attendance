@@ -18,6 +18,7 @@ export default function UploadCadrePage() {
   const mapRole = (designation: string) => {
     if (!designation) return 'Team Member';
     const d = designation.toLowerCase();
+    if (d.includes('n/a') || d === 'na') return 'N/A';
     if (d.includes('gl')) return 'Group Leader';
     if (d.includes('team leader')) return 'Team Leader';
     if (d.includes('mender')) return 'Mender';
@@ -27,7 +28,9 @@ export default function UploadCadrePage() {
 
   const mapGender = (gender: string) => {
     if (!gender) return 'Female';
-    if (gender.toLowerCase().includes('male') && !gender.toLowerCase().includes('female')) return 'Male';
+    const g = gender.toLowerCase();
+    if (g.includes('n/a') || g === 'na') return 'N/A';
+    if (g.includes('male') && !g.includes('female')) return 'Male';
     return 'Female';
   };
 
