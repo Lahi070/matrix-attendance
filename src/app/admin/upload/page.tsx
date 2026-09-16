@@ -16,11 +16,16 @@ export default function UploadCadrePage() {
   const addLog = (msg: string) => setLogs(prev => [...prev, msg]);
 
   const mapRole = (designation: string) => {
-    if (!designation) return 'Team Member';
-    const d = designation.toLowerCase();
-    if (d.includes('n/a') || d === 'na') return 'N/A';
-    if (d.includes('gl')) return 'Group Leader';
-    if (d.includes('team leader')) return 'Team Leader';
+    if (!designation || designation.trim() === '') return 'Team Member';
+    const d = designation.toLowerCase().trim();
+    if (d === 'n/a' || d === 'na') return 'N/A';
+    if (d.includes('senior executive') || d.includes('sr executive') || d.includes('sr. executive')) return 'Senior Executive';
+    if (d.includes('executive') || d.includes('exec')) return 'Executive';
+    if (d.includes('dgm')) return 'DGM';
+    if (d.includes('am') && d.length <= 3) return 'AM';
+    if (d === 'am' || d.includes('assistant manager')) return 'AM';
+    if (d.includes('gl') || d.includes('group leader')) return 'Group Leader';
+    if (d.includes('tl') || d.includes('team leader')) return 'Team Leader';
     if (d.includes('mender')) return 'Mender';
     if (d.includes('indirect')) return 'Indirect';
     return 'Team Member';

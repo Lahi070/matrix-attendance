@@ -20,8 +20,7 @@ export default async function MarkAttendancePage({ params }: { params: { moduleI
   const { data: rawMembers } = await supabase
     .from('team_members')
     .select('id, name, epf, gender, role')
-    .eq('module_id', moduleId)
-    .in('role', ['Team Member', 'Group Leader', 'Team Leader']);
+    .eq('module_id', moduleId);
 
   const members = (rawMembers || []).sort((a, b) => {
     const epfA = parseInt(a.epf, 10);
