@@ -68,6 +68,8 @@ export default function UploadCadrePage() {
 
       // 2. Process valid rows
       const validRows = [];
+      const excelEpfs = new Set<string>();
+
       for (const row of rows) {
         const epf = getColVal(row, 'EPF', 'EmpNo', 'ID');
         const name = getColVal(row, 'Name', 'FullName', 'EmpName', 'EmployeeName');
@@ -90,14 +92,16 @@ export default function UploadCadrePage() {
         }
         if (isExcluded) continue;
 
+        const cleanEpf = String(epf).trim();
         validRows.push({
-          epf: String(epf).trim(),
+          epf: cleanEpf,
           name: String(name).trim(),
           modName: modNameStr,
           modNameLower,
           gender: String(gender || ''),
           desig: String(desig || '')
         });
+        excelEpfs.add(cleanEpf);
       }
 
       addLog(`Found ${validRows.length} valid members after ignoring unneeded modules.`);
@@ -116,11 +120,31 @@ export default function UploadCadrePage() {
       // 4. Get existing members by EPF
       const { data: existingMembers } = await supabase.from('team_members').select('id, epf');
       const epfMap: Record<string, string> = {};
+      const membersToDelete: string[] = [];
+
       existingMembers?.forEach(m => {
         epfMap[m.epf] = m.id;
+        if (!excelEpfs.has(m.epf)) {
+          membersToDelete.push(m.epf);
+        }
       });
 
-      // 5. Upsert rows
+      // 5. Delete members not in excel
+      if (membersToDelete.length > 0) {
+        addLog(`Removing ${membersToDelete.length} members who are no longer in the Excel sheet...`);
+        // Delete in batches of 100
+        for (let i = 0; i < membersToDelete.length; i += 100) {
+          const batch = membersToDelete.slice(i, i + 100);
+          const batchIds = existingMembers?.filter(m => batch.includes(m.epf)).map(m => m.id) || [];
+          if (batchIds.length > 0) {
+            await supabase.from('attendance').delete().in('member_id', batchIds);
+          }
+          await supabase.from('team_members').delete().in('epf', batch);
+        }
+        addLog(`Successfully removed old members.`);
+      }
+
+      // 6. Upsert rows
       let updated = 0;
       let inserted = 0;
 
@@ -150,6 +174,21 @@ export default function UploadCadrePage() {
         }
       }
 
+      // 7. Cleanup Empty Modules
+      addLog(`Cleaning up any empty modules...`);
+      const { data: allMods } = await supabase.from('modules').select('id, name');
+      const { data: allMembers } = await supabase.from('team_members').select('module_id');
+      if (allMods && allMembers) {
+        const activeModuleIds = new Set(allMembers.map(m => m.module_id));
+        const emptyMods = allMods.filter(m => !activeModuleIds.has(m.id));
+        if (emptyMods.length > 0) {
+          const emptyIds = emptyMods.map(m => m.id);
+          await supabase.from('attendance').delete().in('module_id', emptyIds);
+          await supabase.from('modules').delete().in('id', emptyIds);
+          addLog(`Removed ${emptyMods.length} empty modules.`);
+        }
+      }
+
       setProgress(100);
       addLog(`Successfully inserted ${inserted} and updated ${updated} members!`);
       setSuccess(true);
@@ -165,12 +204,9 @@ export default function UploadCadrePage() {
       <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow p-8">
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Upload Cadre (Excel)</h1>
         <p className="text-slate-500 mb-6">
-          Upload the HR Excel sheet to automatically add new members and update existing ones. 
-          Make sure the sheet has columns: <span className="font-mono bg-slate-100 px-1">EPF</span>, 
-          <span className="font-mono bg-slate-100 px-1">Name</span>, 
-          <span className="font-mono bg-slate-100 px-1">Gender</span>, 
-          <span className="font-mono bg-slate-100 px-1">Designation</span>, 
-          <span className="font-mono bg-slate-100 px-1">New Module</span>.
+          Upload the HR Excel sheet to automatically sync members. <br/>
+          <strong className="text-red-500">Note:</strong> Anyone NOT in the Excel sheet will be removed from the system. 
+          Unneeded modules (FCDC, LTO, etc.) are ignored.
         </p>
 
         <div className="flex items-center gap-4 mb-6">
@@ -209,7 +245,7 @@ export default function UploadCadrePage() {
             <CheckCircle className="w-6 h-6 shrink-0 mt-0.5" />
             <div>
               <h3 className="font-bold">Database Updated Successfully!</h3>
-              <p className="text-sm mt-1">The cadre has been synchronized with the Excel sheet.</p>
+              <p className="text-sm mt-1">The cadre has been perfectly synchronized with the Excel sheet.</p>
             </div>
           </div>
         )}
