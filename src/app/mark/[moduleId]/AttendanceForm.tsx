@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
 
-type Member = { id: string; name: string; epf: string; gender: string };
+type Member = { id: string; name: string; epf: string; gender: string; role: string };
 type Reason = { id: string; category: string; reason_text: string };
 
 interface Props {
@@ -162,7 +162,7 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
                       </td>
                       <td className="p-4 font-medium text-slate-300">
                         {member.name}
-                        <div className="text-xs text-slate-500 font-normal mt-0.5">{member.gender}</div>
+                        <div className="text-xs text-slate-500 font-normal mt-0.5">{member.role || member.gender}</div>
                       </td>
                       
                       <td className="p-4">
