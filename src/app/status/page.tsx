@@ -32,6 +32,19 @@ export default async function DailyStatus() {
   const marked = markedModules.size;
   const pending = total - marked;
 
+  const { data: teamMembers } = await supabase
+    .from('team_members')
+    .select('module_id, role');
+
+  const excludedRoles = ['DGM', 'AM', 'Executive', 'Senior Executive'];
+  
+  const cadreCountByModule = (teamMembers || []).reduce((acc: Record<string, number>, member) => {
+    if (member.module_id && !excludedRoles.includes(member.role || '')) {
+      acc[member.module_id] = (acc[member.module_id] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
   return (
     <div className="min-h-screen bg-[#070b14] flex flex-col items-center py-12 px-4 font-sans text-slate-200 relative overflow-hidden">
       {/* Ambient background blur */}
@@ -94,9 +107,10 @@ export default async function DailyStatus() {
         </h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {modules?.map(mod => {
+          {modules?.map((mod, index) => {
             const isMarked = markedModules.has(mod.id);
             const leaderName = leaderMap[mod.id] || mod.responsible_leader || 'No Leader';
+            const cadreCount = cadreCountByModule[mod.id] || 0;
             
             return (
               <div key={mod.id} className={`p-5 rounded-2xl border backdrop-blur-xl relative overflow-hidden transition-all hover:scale-[1.02] ${
@@ -105,11 +119,16 @@ export default async function DailyStatus() {
                   : 'bg-pink-900/20 border-pink-500/40 shadow-[0_0_15px_rgba(236,72,153,0.1)]'
               }`}>
                 <div className="relative z-10">
-                  <div className="font-bold text-lg text-white mb-2">{mod.name}</div>
-                  <div className="text-sm text-slate-300 mb-2">
-                    Leader: <span className="font-medium text-white">{leaderName}</span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`font-bold text-sm ${isMarked ? 'text-emerald-500/70' : 'text-pink-500/70'}`}>#{index + 1}</span>
+                    <div className="font-bold text-lg text-white">{mod.name}</div>
                   </div>
-                  <div className="text-sm text-slate-300 flex items-center justify-between">
+                  <div className="text-sm text-slate-300 mb-2 flex items-center justify-between">
+                    <span>Leader: <span className="font-medium text-white">{leaderName}</span></span>
+                  </div>
+                  <div className="text-sm text-slate-300 flex items-center justify-between mb-2">
+                    <span>Cadre: <span className="font-medium text-white">{cadreCount}</span></span>
+                  </div>
                     <span>Status: <span className={`font-medium ${isMarked ? 'text-emerald-400' : 'text-pink-400'}`}>{isMarked ? 'Completed' : 'Pending'}</span></span>
                   </div>
                 </div>

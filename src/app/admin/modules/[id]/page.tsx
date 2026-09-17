@@ -189,6 +189,7 @@ export default function EditModule({ params }: { params: Promise<{ id: string }>
           <table className="w-full text-left border-collapse">
             <thead className="bg-slate-900/95 border-b border-slate-700/50">
               <tr>
+                <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider w-12 text-center">#</th>
                 <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">EPF</th>
                 <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Name</th>
                 <th className="p-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Role</th>
@@ -198,10 +199,11 @@ export default function EditModule({ params }: { params: Promise<{ id: string }>
             </thead>
             <tbody className="divide-y divide-slate-700/30">
               {members.length === 0 ? (
-                <tr><td colSpan={5} className="p-8 text-center text-slate-500 font-medium">No members assigned to this module yet.</td></tr>
+                <tr><td colSpan={6} className="p-8 text-center text-slate-500 font-medium">No members assigned to this module yet.</td></tr>
               ) : (
-                members.map(member => (
+                members.map((member, index) => (
                   <tr key={member.id} className="hover:bg-slate-800/40 transition-colors">
+                    <td className="p-4 font-bold text-slate-500 text-center text-sm">{index + 1}</td>
                     <td className="p-4 font-bold text-slate-300">{member.epf}</td>
                     <td className="p-4 font-bold text-slate-200">{member.name}</td>
                     <td className="p-4">

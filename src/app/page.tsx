@@ -12,6 +12,19 @@ export default async function Home() {
     .eq('is_active', true)
     .order('name');
 
+  const { data: teamMembers } = await supabase
+    .from('team_members')
+    .select('module_id, role');
+
+  const excludedRoles = ['DGM', 'AM', 'Executive', 'Senior Executive'];
+  
+  const cadreCountByModule = (teamMembers || []).reduce((acc: Record<string, number>, member) => {
+    if (member.module_id && !excludedRoles.includes(member.role || '')) {
+      acc[member.module_id] = (acc[member.module_id] || 0) + 1;
+    }
+    return acc;
+  }, {});
+
   return (
     <div className="min-h-screen bg-[#070b14] flex flex-col items-center justify-center p-4 font-sans text-slate-200 relative overflow-hidden">
       {/* Ambient background blur */}
@@ -40,24 +53,37 @@ export default async function Home() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {modules && modules.length > 0 ? (
-              modules.map((mod) => (
-                <Link 
-                  key={mod.id} 
-                  href={`/mark/${mod.id}`}
-                  className="group relative overflow-hidden bg-[#1f2937]/50 p-5 border border-slate-700/50 rounded-2xl hover:border-cyan-500/50 hover:bg-[#1f2937] hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col justify-center"
-                >
-                  <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-cyan-500/5 rounded-full blur-xl group-hover:bg-cyan-500/10 transition-colors duration-300"></div>
-                  <div className="flex justify-between items-center mb-2 relative z-10">
-                    <div className="font-bold text-lg text-slate-200 group-hover:text-cyan-400 transition-colors">{mod.name}</div>
-                    <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-cyan-400 relative z-10 transition-colors transform group-hover:translate-x-1" />
-                  </div>
-                  {mod.responsible_leader && (
-                    <div className="text-xs font-medium text-slate-400 bg-[#0f172a] px-3 py-1 rounded-lg w-fit border border-slate-700/50 shadow-inner relative z-10">
-                      {mod.responsible_leader}
+              modules.map((mod, index) => {
+                const cadreCount = cadreCountByModule[mod.id] || 0;
+                return (
+                  <Link 
+                    key={mod.id} 
+                    href={`/mark/${mod.id}`}
+                    className="group relative overflow-hidden bg-[#1f2937]/50 p-5 border border-slate-700/50 rounded-2xl hover:border-cyan-500/50 hover:bg-[#1f2937] hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col justify-center"
+                  >
+                    <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-cyan-500/5 rounded-full blur-xl group-hover:bg-cyan-500/10 transition-colors duration-300"></div>
+                    
+                    <div className="flex justify-between items-center mb-2 relative z-10">
+                      <div className="flex items-center gap-2">
+                        <span className="text-cyan-500 font-bold opacity-70 text-sm">#{index + 1}</span>
+                        <div className="font-bold text-lg text-slate-200 group-hover:text-cyan-400 transition-colors">{mod.name}</div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-cyan-400 relative z-10 transition-colors transform group-hover:translate-x-1" />
                     </div>
-                  )}
-                </Link>
-              ))
+                    
+                    <div className="flex items-center gap-2 mt-1 relative z-10">
+                      {mod.responsible_leader && (
+                        <div className="text-xs font-medium text-slate-400 bg-[#0f172a] px-3 py-1 rounded-lg w-fit border border-slate-700/50 shadow-inner">
+                          {mod.responsible_leader}
+                        </div>
+                      )}
+                      <div className="text-[10px] font-bold text-cyan-300 uppercase tracking-widest bg-cyan-950/40 border border-cyan-800/50 px-2 py-1 rounded-lg">
+                        Cadre: {cadreCount}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })
             ) : (
               <div className="col-span-full p-8 text-center text-slate-500 bg-[#1f2937]/30 rounded-2xl border border-dashed border-slate-700/50">
                 No active modules available.

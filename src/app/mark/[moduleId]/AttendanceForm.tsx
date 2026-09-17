@@ -149,6 +149,7 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-slate-950 border-b border-slate-800 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                  <th className="p-4 w-12 text-center">#</th>
                   <th className="p-4 w-24">EPF</th>
                   <th className="p-4">Name</th>
                   <th className="p-4 text-center w-40">Status</th>
@@ -156,12 +157,13 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/50">
-                {members.map((member) => {
+                {members.map((member, index) => {
                   const record = attendance[member.id] || {};
                   const hasError = errorIds.has(member.id);
                   
                   return (
                     <tr key={member.id} className={`transition-colors ${hasError ? 'bg-red-950/20' : 'hover:bg-slate-900/50'}`}>
+                      <td className="p-4 font-bold text-slate-500 text-center text-sm">{index + 1}</td>
                       <td className="p-4 font-bold text-slate-200">
                         {member.epf}
                         {hasError && <AlertCircle className="w-4 h-4 text-red-500 inline ml-2" />}
