@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Grid, Settings, FileSpreadsheet, LogOut, Scissors, UserPlus } from 'lucide-react';
+import { LayoutDashboard, Users, Grid, Settings, FileSpreadsheet, LogOut, Command, UserPlus } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -17,36 +17,38 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ];
 
   return (
-    <div className="flex h-screen bg-slate-50 font-sans">
+    <div className="flex h-screen bg-[#070b14] font-sans text-slate-300 overflow-hidden">
       {/* Sidebar */}
-      <div className="w-64 bg-slate-900 text-white flex flex-col shadow-2xl z-10 relative">
+      <div className="w-64 bg-[#0a101d] border-r border-slate-800/60 flex flex-col relative z-20">
         <div className="p-6 pb-2">
           <div className="flex items-center gap-3 mb-2">
-            <div className="bg-white p-2 rounded-lg">
-              <Scissors className="w-6 h-6 text-slate-900" />
+            <div className="bg-gradient-to-br from-cyan-400 to-blue-600 p-2 rounded-xl shadow-lg shadow-cyan-500/20">
+              <Command className="w-6 h-6 text-white" />
             </div>
-            <h2 className="text-xl font-black tracking-tight">MAS Admin</h2>
+            <div>
+              <h2 className="text-xl font-bold tracking-tight text-white">MAS Matrix</h2>
+              <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase mt-0.5">Matrix System</p>
+            </div>
           </div>
-          <p className="text-xs text-slate-400 font-bold tracking-widest uppercase mb-8">Matrix System</p>
         </div>
         
-        <nav className="flex-1 px-4 space-y-2">
+        <nav className="flex-1 px-4 mt-8 space-y-2">
           {nav.map(item => {
             const Icon = item.icon;
             const isActive = pathname === item.path;
             return (
               <Link key={item.name} href={item.path} 
-                className={`flex items-center gap-3 p-3 rounded-xl transition-all font-medium text-sm
-                ${isActive ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}>
-                <Icon className={`w-5 h-5 ${isActive ? 'text-indigo-400' : ''}`} />
+                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all font-medium text-sm
+                ${isActive ? 'bg-gradient-to-r from-blue-900/40 to-transparent text-white border border-blue-800/50 shadow-inner' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}>
+                <Icon className={`w-5 h-5 ${isActive ? 'text-cyan-400' : 'text-slate-500'}`} />
                 {item.name}
               </Link>
             )
           })}
         </nav>
         
-        <div className="p-4 border-t border-slate-800">
-          <Link href="/" className="flex items-center gap-3 p-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all font-medium text-sm">
+        <div className="p-4 border-t border-slate-800/60 mt-auto">
+          <Link href="/" className="flex items-center gap-4 px-4 py-3.5 text-slate-400 hover:bg-slate-800/50 hover:text-white rounded-xl transition-all font-medium text-sm">
             <LogOut className="w-5 h-5" />
             Exit Admin
           </Link>
@@ -54,8 +56,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto bg-slate-50 p-8">
-        <div className="max-w-6xl mx-auto">
+      <div className="flex-1 overflow-auto p-8 relative">
+        {/* Ambient Background Glows */}
+        <div className="fixed top-[-10%] left-[20%] w-[50vw] h-[50vw] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="fixed bottom-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-purple-900/10 rounded-full blur-[120px] pointer-events-none"></div>
+        
+        <div className="max-w-6xl mx-auto relative z-10 pb-10">
           {children}
         </div>
       </div>
