@@ -129,6 +129,7 @@ export default async function DailyStatus() {
                   <div className="text-sm text-slate-300 flex items-center justify-between mb-2">
                     <span>Cadre: <span className="font-medium text-white">{cadreCount}</span></span>
                   </div>
+                  <div className="text-sm text-slate-300 flex items-center justify-between">
                     <span>Status: <span className={`font-medium ${isMarked ? 'text-emerald-400' : 'text-pink-400'}`}>{isMarked ? 'Completed' : 'Pending'}</span></span>
                   </div>
                 </div>
