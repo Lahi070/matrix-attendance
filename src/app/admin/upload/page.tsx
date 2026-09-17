@@ -226,31 +226,32 @@ export default function UploadCadrePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
-      <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow p-8">
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Upload Cadre (Excel)</h1>
-        <p className="text-slate-500 mb-6">
+    <div className="min-h-screen bg-transparent p-4 sm:p-8">
+      <div className="max-w-3xl mx-auto bg-[#111827]/80 backdrop-blur-xl rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.3)] border border-slate-700/50 p-8 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2 relative z-10">Upload Cadre (Excel)</h1>
+        <p className="text-slate-400 mb-8 relative z-10 font-medium">
           Upload the HR Excel sheet to automatically sync members. <br/>
-          <strong className="text-red-500">Note:</strong> Anyone NOT in the Excel sheet will be removed from the system. 
+          <strong className="text-pink-400 bg-pink-500/10 px-2 py-0.5 rounded-md border border-pink-500/20 ml-1">Note:</strong> Anyone NOT in the Excel sheet will be removed from the system. 
           Unneeded modules (FCDC, LTO, etc.) are ignored.
         </p>
 
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row items-center gap-4 mb-8 relative z-10">
           <input 
             type="file" 
             accept=".xlsx, .xls"
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="block w-full text-sm text-slate-500
-              file:mr-4 file:py-2 file:px-4
-              file:rounded-full file:border-0
-              file:text-sm file:font-semibold
-              file:bg-indigo-50 file:text-indigo-700
-              hover:file:bg-indigo-100 cursor-pointer border border-slate-200 rounded-full"
+            className="block w-full text-sm text-slate-400
+              file:mr-4 file:py-3 file:px-6
+              file:rounded-xl file:border-0
+              file:text-sm file:font-bold
+              file:bg-indigo-900/40 file:text-indigo-400
+              hover:file:bg-indigo-900/60 file:border file:border-indigo-800/50 cursor-pointer bg-slate-900/80 border border-slate-700 rounded-xl transition-all file:transition-all"
           />
           <button 
             onClick={handleUpload}
             disabled={!file || loading}
-            className="bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-full font-bold flex items-center gap-2"
+            className="w-full sm:w-auto bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 disabled:opacity-50 text-white px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.5)] shrink-0"
           >
             {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <UploadCloud className="w-5 h-5" />}
             {loading ? 'Processing...' : 'Upload'}
@@ -258,32 +259,32 @@ export default function UploadCadrePage() {
         </div>
 
         {loading && (
-          <div className="mb-6">
-            <div className="w-full bg-slate-200 rounded-full h-2.5 mb-2">
-              <div className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300" style={{ width: `${progress}%` }}></div>
+          <div className="mb-8 relative z-10">
+            <div className="w-full bg-slate-800/80 rounded-full h-3 mb-3 border border-slate-700/50 overflow-hidden">
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-300 shadow-[0_0_10px_rgba(79,70,229,0.5)]" style={{ width: `${progress}%` }}></div>
             </div>
-            <p className="text-xs text-slate-500 text-right">{progress}% completed</p>
+            <p className="text-xs font-bold text-slate-400 text-right">{progress}% completed</p>
           </div>
         )}
 
         {success && (
-          <div className="bg-green-50 text-green-700 p-4 rounded-xl flex items-start gap-3 mb-6 border border-green-200">
-            <CheckCircle className="w-6 h-6 shrink-0 mt-0.5" />
+          <div className="bg-emerald-500/10 text-emerald-400 p-5 rounded-xl flex items-start gap-4 mb-8 border border-emerald-500/30 relative z-10 shadow-inner">
+            <CheckCircle className="w-7 h-7 shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-bold">Database Updated Successfully!</h3>
-              <p className="text-sm mt-1">The cadre has been perfectly synchronized with the Excel sheet.</p>
+              <h3 className="font-extrabold text-lg">Database Updated Successfully!</h3>
+              <p className="text-sm mt-1 text-emerald-500">The cadre has been perfectly synchronized with the Excel sheet.</p>
             </div>
           </div>
         )}
 
         {logs.length > 0 && (
-          <div className="bg-slate-900 rounded-xl p-4 overflow-hidden">
-            <div className="flex items-center justify-between mb-2 pb-2 border-b border-slate-800">
+          <div className="bg-slate-900/90 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-5 overflow-hidden relative z-10 shadow-inner">
+            <div className="flex items-center justify-between mb-3 pb-3 border-b border-slate-800/80">
               <h3 className="text-slate-400 text-xs font-bold uppercase tracking-wider">Process Logs</h3>
             </div>
-            <div className="max-h-64 overflow-y-auto font-mono text-xs text-slate-300 space-y-1">
+            <div className="max-h-64 overflow-y-auto font-mono text-xs text-slate-300 space-y-1.5 custom-scrollbar pr-2">
               {logs.map((log, i) => (
-                <div key={i}>{log}</div>
+                <div key={i} className="bg-slate-800/40 px-3 py-1.5 rounded-lg border border-slate-700/30">{log}</div>
               ))}
             </div>
           </div>

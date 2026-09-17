@@ -81,31 +81,31 @@ export default function ReportsPage() {
     setLoading(false);
   };
 
-  return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Attendance Reports</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight text-white mb-6">Attendance Reports</h1>
 
-      <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100 max-w-xl">
-        <h2 className="font-bold mb-4">Export Excel Report</h2>
-        <div className="flex gap-4 items-end mb-6">
-          <div className="flex-1">
-            <label className="block text-sm text-gray-600 mb-1">Start Date</label>
-            <input type="date" className="w-full border rounded p-2" value={startDate} onChange={e => setStartDate(e.target.value)} />
+      <div className="bg-[#111827]/80 backdrop-blur-xl p-8 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.3)] border border-slate-700/50 max-w-xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <h2 className="font-bold text-slate-200 mb-6 relative z-10">Export Excel Report</h2>
+        <div className="flex flex-col sm:flex-row gap-5 items-end mb-8 relative z-10">
+          <div className="flex-1 w-full">
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Start Date</label>
+            <input type="date" className="w-full border border-slate-700 bg-slate-900/80 text-slate-200 rounded-xl p-3 text-sm focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-inner transition-all color-scheme-dark" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ colorScheme: 'dark' }} />
           </div>
-          <div className="flex-1">
-            <label className="block text-sm text-gray-600 mb-1">End Date</label>
-            <input type="date" className="w-full border rounded p-2" value={endDate} onChange={e => setEndDate(e.target.value)} />
+          <div className="flex-1 w-full">
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">End Date</label>
+            <input type="date" className="w-full border border-slate-700 bg-slate-900/80 text-slate-200 rounded-xl p-3 text-sm focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500 outline-none shadow-inner transition-all color-scheme-dark" value={endDate} onChange={e => setEndDate(e.target.value)} style={{ colorScheme: 'dark' }} />
           </div>
         </div>
         
         <button 
           onClick={generateReport}
           disabled={loading}
-          className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-medium disabled:opacity-50"
+          className="w-full bg-gradient-to-r from-emerald-600 to-emerald-400 hover:from-emerald-500 hover:to-emerald-300 text-slate-900 px-8 py-3.5 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.3)] hover:shadow-[0_0_25px_rgba(16,185,129,0.5)] disabled:opacity-50 relative z-10 text-base"
         >
           {loading ? 'Generating...' : 'Download .xlsx Report'}
         </button>
-        <p className="text-xs text-gray-500 mt-4">
+        <p className="text-xs font-medium text-slate-500 mt-5 relative z-10 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
           The report will include EPF, Name, Module, Days Present, and counts for each leave category in the selected date range.
         </p>
       </div>

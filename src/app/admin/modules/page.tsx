@@ -53,69 +53,74 @@ export default function ManageModules() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Manage Modules</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight text-white mb-6">Manage Modules</h1>
 
-      <div className="bg-white p-6 rounded-lg shadow-sm mb-8 border border-gray-100">
-        <h2 className="font-bold mb-4">Add New Module</h2>
-        <form onSubmit={handleAdd} className="flex gap-4 items-end">
-          <div className="flex-1">
-            <label className="block text-sm text-gray-600 mb-1">Module Name</label>
+      <div className="bg-[#111827]/80 backdrop-blur-xl p-8 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.3)] mb-8 border border-slate-700/50 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <h2 className="font-bold text-slate-200 mb-6 relative z-10">Add New Module</h2>
+        <form onSubmit={handleAdd} className="flex flex-col sm:flex-row gap-5 items-end relative z-10">
+          <div className="flex-1 w-full">
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Module Name</label>
             <input 
               type="text" 
-              className="w-full border rounded p-2" 
+              className="w-full border border-slate-700 bg-slate-900/80 text-slate-200 rounded-xl p-3 text-sm focus:ring-1 focus:ring-purple-500 focus:border-purple-500 outline-none shadow-inner transition-all" 
               value={name} 
               onChange={e => setName(e.target.value)} 
               required 
             />
           </div>
-          <div className="flex-1">
-            <label className="block text-sm text-gray-600 mb-1">Responsible Leader</label>
+          <div className="flex-1 w-full">
+            <label className="block text-sm font-medium text-slate-400 mb-1.5">Responsible Leader</label>
             <input 
               type="text" 
-              className="w-full border rounded p-2" 
+              className="w-full border border-slate-700 bg-slate-900/80 text-slate-200 rounded-xl p-3 text-sm focus:ring-1 focus:ring-purple-500 focus:border-purple-500 outline-none shadow-inner transition-all" 
               value={leader} 
               onChange={e => setLeader(e.target.value)} 
             />
           </div>
-          <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded font-medium hover:bg-blue-700">Add</button>
+          <button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white px-8 py-3.5 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(147,51,234,0.3)] hover:shadow-[0_0_25px_rgba(147,51,234,0.5)]">
+            Add Module
+          </button>
         </form>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-left">
-          <thead className="bg-gray-50 border-b">
-            <tr>
-              <th className="p-4">Name</th>
-              <th className="p-4">Leader</th>
-              <th className="p-4">Status</th>
-              <th className="p-4 text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? <tr><td colSpan={4} className="p-4 text-center">Loading...</td></tr> : modules.map(mod => (
-              <tr key={mod.id} className="border-b hover:bg-gray-50">
-                <td className="p-4 font-medium">{mod.name}</td>
-                <td className="p-4 text-gray-600">{mod.responsible_leader}</td>
-                <td className="p-4">
-                  <span className={`px-2 py-1 rounded text-xs font-bold ${mod.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                    {mod.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td className="p-4 text-right flex justify-end gap-2 items-center">
-                  <Link href={`/admin/modules/${mod.id}`} className="px-3 py-1 text-sm rounded font-bold text-blue-600 hover:bg-blue-50 border border-blue-200 hover:border-blue-300 transition-colors">
-                    Edit
-                  </Link>
-                  <button 
-                    onClick={() => toggleStatus(mod.id, mod.is_active)}
-                    className={`px-3 py-1 text-sm rounded font-bold border transition-colors ${mod.is_active ? 'text-red-600 hover:bg-red-50 border-red-200 hover:border-red-300' : 'text-green-600 hover:bg-green-50 border-green-200 hover:border-green-300'}`}
-                  >
-                    {mod.is_active ? 'Deactivate' : 'Activate'}
-                  </button>
-                </td>
+      <div className="bg-[#111827]/80 backdrop-blur-xl rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.3)] border border-slate-700/50 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead className="bg-slate-800/80 border-b border-slate-700/50">
+              <tr>
+                <th className="p-4 text-sm font-semibold tracking-wide text-slate-300">Name</th>
+                <th className="p-4 text-sm font-semibold tracking-wide text-slate-300">Leader</th>
+                <th className="p-4 text-sm font-semibold tracking-wide text-slate-300">Status</th>
+                <th className="p-4 text-sm font-semibold tracking-wide text-slate-300 text-right">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-700/30">
+              {loading ? <tr><td colSpan={4} className="p-8 text-center text-slate-400 font-medium">Loading modules...</td></tr> : modules.map(mod => (
+                <tr key={mod.id} className="hover:bg-slate-800/40 transition-colors">
+                  <td className="p-4 font-bold text-slate-200">{mod.name}</td>
+                  <td className="p-4 text-slate-400">{mod.responsible_leader || <span className="italic text-slate-600">No Leader</span>}</td>
+                  <td className="p-4">
+                    <span className={`px-3 py-1 rounded-lg text-xs font-bold border ${mod.is_active ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30' : 'bg-pink-500/10 text-pink-400 border-pink-500/30'}`}>
+                      {mod.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                  </td>
+                  <td className="p-4 text-right flex justify-end gap-3 items-center">
+                    <Link href={`/admin/modules/${mod.id}`} className="px-4 py-2 text-sm rounded-lg font-bold text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/40 border border-cyan-800/50 hover:border-cyan-500/50 transition-all shadow-sm">
+                      Edit
+                    </Link>
+                    <button 
+                      onClick={() => toggleStatus(mod.id, mod.is_active)}
+                      className={`px-4 py-2 text-sm rounded-lg font-bold border transition-all shadow-sm ${mod.is_active ? 'text-pink-400 hover:text-pink-300 hover:bg-pink-950/40 border-pink-800/50 hover:border-pink-500/50' : 'text-emerald-400 hover:text-emerald-300 hover:bg-emerald-950/40 border-emerald-800/50 hover:border-emerald-500/50'}`}
+                    >
+                      {mod.is_active ? 'Deactivate' : 'Activate'}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );
