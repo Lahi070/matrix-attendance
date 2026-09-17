@@ -81,6 +81,7 @@ export default function ReportsPage() {
     setLoading(false);
   };
 
+  return (
     <div>
       <h1 className="text-3xl font-extrabold tracking-tight text-white mb-6">Attendance Reports</h1>
 
