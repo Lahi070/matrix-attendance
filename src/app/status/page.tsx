@@ -10,6 +10,21 @@ export default async function DailyStatus() {
   const today = new Date().toISOString().split('T')[0];
   const { data: attendance } = await supabase.from('attendance').select('module_id').eq('date', today);
 
+  // Get Team Leaders for each module
+  const { data: teamLeaders } = await supabase
+    .from('team_members')
+    .select('name, module_id')
+    .eq('role', 'Team Leader');
+  
+  const leaderMap: Record<string, string> = {};
+  teamLeaders?.forEach(tl => {
+    if (leaderMap[tl.module_id]) {
+      leaderMap[tl.module_id] += `, ${tl.name}`;
+    } else {
+      leaderMap[tl.module_id] = tl.name;
+    }
+  });
+
   // Group by module
   const markedModules = new Set(attendance?.map(a => a.module_id));
 
@@ -70,7 +85,7 @@ export default async function DailyStatus() {
                   <div>
                     <div className={`font-bold ${isMarked ? 'text-green-400' : 'text-red-400'}`}>{mod.name}</div>
                     <div className={`text-xs font-medium mt-0.5 ${isMarked ? 'text-green-600' : 'text-red-600'}`}>
-                      {mod.responsible_leader || 'No Leader'}
+                      {leaderMap[mod.id] || mod.responsible_leader || 'No Leader'}
                     </div>
                   </div>
                   {isMarked ? (

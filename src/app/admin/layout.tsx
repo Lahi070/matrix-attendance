@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, Grid, Settings, FileSpreadsheet, LogOut, Scissors } from 'lucide-react';
+import { LayoutDashboard, Users, Grid, Settings, FileSpreadsheet, LogOut, Scissors, UserPlus } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -11,6 +11,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: 'Dashboard', path: '/admin', icon: LayoutDashboard },
     { name: 'Modules', path: '/admin/modules', icon: Grid },
     { name: 'Members', path: '/admin/members', icon: Users },
+    { name: 'Assign TL', path: '/admin/assign-tl', icon: UserPlus },
     { name: 'Reasons', path: '/admin/reasons', icon: Settings },
     { name: 'Reports', path: '/admin/reports', icon: FileSpreadsheet },
   ];
