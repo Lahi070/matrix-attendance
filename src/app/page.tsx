@@ -1,7 +1,7 @@
 /* eslint-disable */
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { Scissors, ChevronRight, Activity, ShieldCheck } from 'lucide-react';
+import { Scissors, ChevronRight, Activity, Settings } from 'lucide-react';
 
 export const revalidate = 0; // Disable caching
 
