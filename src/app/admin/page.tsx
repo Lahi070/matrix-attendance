@@ -6,7 +6,9 @@ import ManualPercentageCard from './ManualPercentageCard';
 export const revalidate = 0;
 
 export default async function AdminDashboard() {
-  const { count: memberCount } = await supabase.from('team_members').select('*', { count: 'exact', head: true });
+  const excludedRoles = ['DGM', 'AM', 'Executive', 'Senior Executive'];
+  
+  const { count: memberCount } = await supabase.from('team_members').select('*', { count: 'exact', head: true }).not('role', 'in', '("DGM","AM","Executive","Senior Executive")');
   const { count: moduleCount } = await supabase.from('modules').select('*', { count: 'exact', head: true });
   const { count: activeModuleCount } = await supabase.from('modules').select('*', { count: 'exact', head: true }).eq('is_active', true);
   
@@ -21,7 +23,7 @@ export default async function AdminDashboard() {
   const roleCounts: Record<string, number> = {};
   const informLeaveReasons: Record<string, number> = {};
 
-  const { data: allMembers } = await supabase.from('team_members').select('role');
+  const { data: allMembers } = await supabase.from('team_members').select('role').not('role', 'in', '("DGM","AM","Executive","Senior Executive")');
   allMembers?.forEach(m => {
     roleCounts[m.role] = (roleCounts[m.role] || 0) + 1;
   });
