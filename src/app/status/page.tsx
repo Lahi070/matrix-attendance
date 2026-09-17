@@ -125,7 +125,9 @@ export default async function DailyStatus() {
         </h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {modules?.map((mod, index) => {
+          {modules
+            ?.filter(mod => mod.name !== 'Laying' && mod.name !== 'Needle recoder')
+            .map((mod) => {
             const isMarked = markedModules.has(mod.id);
             const leaderName = leaderMap[mod.id] || mod.responsible_leader || 'No Leader';
             const cadreCount = cadreCountByModule[mod.id] || 0;

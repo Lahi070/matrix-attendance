@@ -72,7 +72,9 @@ export default async function Home() {
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {modules && modules.length > 0 ? (
-              modules.map((mod, index) => {
+              modules
+                .filter(mod => mod.name !== 'Laying' && mod.name !== 'Needle recoder')
+                .map((mod) => {
                 const cadreCount = cadreCountByModule[mod.id] || 0;
                 return (
                   <Link 

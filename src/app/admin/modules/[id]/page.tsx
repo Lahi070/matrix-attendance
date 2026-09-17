@@ -30,10 +30,21 @@ export default function EditModule({ params }: { params: Promise<{ id: string }>
   const [assignWorkerType, setAssignWorkerType] = useState('Direct');
 
   const fetchModuleData = async () => {
-    const { data: mod } = await supabase.from('modules').select('*').eq('id', moduleId).single();
+    const { data: allModules } = await supabase.from('modules').select('*');
+    const mod = allModules?.find(m => m.id === moduleId);
     if (mod) setModule(mod);
 
-    const { data: mems } = await supabase.from('team_members').select('*').eq('module_id', moduleId);
+    let moduleIdsToFetch = [moduleId];
+
+    if (mod?.name === 'Cutting') {
+      const laying = allModules?.find(m => m.name === 'Laying');
+      if (laying) moduleIdsToFetch.push(laying.id);
+    } else if (mod?.name === 'Batch Preparation') {
+      const needle = allModules?.find(m => m.name === 'Needle recoder');
+      if (needle) moduleIdsToFetch.push(needle.id);
+    }
+
+    const { data: mems } = await supabase.from('team_members').select('*').in('module_id', moduleIdsToFetch);
     if (mems) {
       setMembers(mems.sort((a, b) => parseInt(a.epf) - parseInt(b.epf)));
     }
