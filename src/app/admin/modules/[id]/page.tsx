@@ -36,11 +36,11 @@ export default function EditModule({ params }: { params: Promise<{ id: string }>
 
     let moduleIdsToFetch = [moduleId];
 
-    if (mod?.name === 'Cutting') {
-      const laying = allModules?.find(m => m.name === 'Laying');
+    if (mod?.name?.toLowerCase().includes('cutting')) {
+      const laying = allModules?.find(m => m.name?.toLowerCase().includes('laying'));
       if (laying) moduleIdsToFetch.push(laying.id);
-    } else if (mod?.name === 'Batch Preparation') {
-      const needle = allModules?.find(m => m.name === 'Needle recoder');
+    } else if (mod?.name?.toLowerCase().includes('batch')) {
+      const needle = allModules?.find(m => m.name?.toLowerCase().includes('needle'));
       if (needle) moduleIdsToFetch.push(needle.id);
     }
 

@@ -16,11 +16,11 @@ export default async function MarkAttendancePage({ params }: { params: { moduleI
 
   let moduleIdsToFetch = [moduleId];
 
-  if (moduleData.name === 'Cutting') {
-    const laying = allModules?.find((m: any) => m.name === 'Laying');
+  if (moduleData.name?.toLowerCase().includes('cutting')) {
+    const laying = allModules?.find((m: any) => m.name?.toLowerCase().includes('laying'));
     if (laying) moduleIdsToFetch.push(laying.id);
-  } else if (moduleData.name === 'Batch Preparation') {
-    const needle = allModules?.find((m: any) => m.name === 'Needle recoder');
+  } else if (moduleData.name?.toLowerCase().includes('batch')) {
+    const needle = allModules?.find((m: any) => m.name?.toLowerCase().includes('needle'));
     if (needle) moduleIdsToFetch.push(needle.id);
   }
 

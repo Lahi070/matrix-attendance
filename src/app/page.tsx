@@ -25,18 +25,17 @@ export default async function Home() {
     return acc;
   }, {});
 
-  // Combine cadre for specific modules
   if (modules) {
-    const cuttingModule = modules.find(m => m.name === 'Cutting');
-    const layingModule = modules.find(m => m.name === 'Laying');
+    const cuttingModule = modules.find(m => m.name?.toLowerCase().includes('cutting'));
+    const layingModule = modules.find(m => m.name?.toLowerCase().includes('laying'));
     if (cuttingModule && layingModule) {
       const combined = (cadreCountByModule[cuttingModule.id] || 0) + (cadreCountByModule[layingModule.id] || 0);
       cadreCountByModule[cuttingModule.id] = combined;
       cadreCountByModule[layingModule.id] = combined;
     }
 
-    const batchModule = modules.find(m => m.name === 'Batch Preparation');
-    const needleModule = modules.find(m => m.name === 'Needle recoder');
+    const batchModule = modules.find(m => m.name?.toLowerCase().includes('batch'));
+    const needleModule = modules.find(m => m.name?.toLowerCase().includes('needle'));
     if (batchModule && needleModule) {
       const combined = (cadreCountByModule[batchModule.id] || 0) + (cadreCountByModule[needleModule.id] || 0);
       cadreCountByModule[batchModule.id] = combined;
@@ -73,7 +72,10 @@ export default async function Home() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {modules && modules.length > 0 ? (
               modules
-                .filter(mod => mod.name !== 'Laying' && mod.name !== 'Needle recoder')
+                .filter(mod => {
+                  const n = mod.name?.toLowerCase() || '';
+                  return !n.includes('laying') && !n.includes('needle');
+                })
                 .map((mod) => {
                 const cadreCount = cadreCountByModule[mod.id] || 0;
                 return (

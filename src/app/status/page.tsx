@@ -46,16 +46,16 @@ export default async function DailyStatus() {
   }, {});
 
   if (modules) {
-    const cuttingModule = modules.find(m => m.name === 'Cutting');
-    const layingModule = modules.find(m => m.name === 'Laying');
+    const cuttingModule = modules.find(m => m.name?.toLowerCase().includes('cutting'));
+    const layingModule = modules.find(m => m.name?.toLowerCase().includes('laying'));
     if (cuttingModule && layingModule) {
       const combined = (cadreCountByModule[cuttingModule.id] || 0) + (cadreCountByModule[layingModule.id] || 0);
       cadreCountByModule[cuttingModule.id] = combined;
       cadreCountByModule[layingModule.id] = combined;
     }
 
-    const batchModule = modules.find(m => m.name === 'Batch Preparation');
-    const needleModule = modules.find(m => m.name === 'Needle recoder');
+    const batchModule = modules.find(m => m.name?.toLowerCase().includes('batch'));
+    const needleModule = modules.find(m => m.name?.toLowerCase().includes('needle'));
     if (batchModule && needleModule) {
       const combined = (cadreCountByModule[batchModule.id] || 0) + (cadreCountByModule[needleModule.id] || 0);
       cadreCountByModule[batchModule.id] = combined;
@@ -126,7 +126,10 @@ export default async function DailyStatus() {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {modules
-            ?.filter(mod => mod.name !== 'Laying' && mod.name !== 'Needle recoder')
+            ?.filter(mod => {
+              const n = mod.name?.toLowerCase() || '';
+              return !n.includes('laying') && !n.includes('needle');
+            })
             .map((mod) => {
             const isMarked = markedModules.has(mod.id);
             const leaderName = leaderMap[mod.id] || mod.responsible_leader || 'No Leader';
