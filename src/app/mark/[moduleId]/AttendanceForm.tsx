@@ -18,7 +18,13 @@ interface Props {
 
 export default function AttendanceForm({ moduleId, moduleName, members, reasons }: Props) {
   const router = useRouter();
-  const [attendance, setAttendance] = useState<Record<string, { status: string; category?: string; reason_id?: string }>>({});
+  const [attendance, setAttendance] = useState<Record<string, { status: string; category?: string; reason_id?: string }>>(() => {
+    const initialState: Record<string, { status: string; category?: string; reason_id?: string }> = {};
+    members.forEach(member => {
+      initialState[member.id] = { status: 'Present', category: '', reason_id: '' };
+    });
+    return initialState;
+  });
   const [error, setError] = useState('');
   const [errorIds, setErrorIds] = useState<Set<string>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
