@@ -45,6 +45,24 @@ export default async function DailyStatus() {
     return acc;
   }, {});
 
+  if (modules) {
+    const cuttingModule = modules.find(m => m.name === 'Cutting');
+    const layingModule = modules.find(m => m.name === 'Laying');
+    if (cuttingModule && layingModule) {
+      const combined = (cadreCountByModule[cuttingModule.id] || 0) + (cadreCountByModule[layingModule.id] || 0);
+      cadreCountByModule[cuttingModule.id] = combined;
+      cadreCountByModule[layingModule.id] = combined;
+    }
+
+    const batchModule = modules.find(m => m.name === 'Batch Preparation');
+    const needleModule = modules.find(m => m.name === 'Needle recoder');
+    if (batchModule && needleModule) {
+      const combined = (cadreCountByModule[batchModule.id] || 0) + (cadreCountByModule[needleModule.id] || 0);
+      cadreCountByModule[batchModule.id] = combined;
+      cadreCountByModule[needleModule.id] = combined;
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#070b14] flex flex-col items-center py-12 px-4 font-sans text-slate-200 relative overflow-hidden">
       {/* Ambient background blur */}
@@ -120,7 +138,6 @@ export default async function DailyStatus() {
               }`}>
                 <div className="relative z-10">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`font-bold text-sm ${isMarked ? 'text-emerald-500/70' : 'text-pink-500/70'}`}>#{index + 1}</span>
                     <div className="font-bold text-lg text-white">{mod.name}</div>
                   </div>
                   <div className="text-sm text-slate-300 mb-2 flex items-center justify-between">
