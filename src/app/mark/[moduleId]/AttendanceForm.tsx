@@ -95,8 +95,15 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
       const record = attendance[member.id];
       if (!record || !record.status) {
         newErrorIds.add(member.id);
-      } else if (record.status === 'Absent' && (!record.category || !record.reason_id)) {
-        newErrorIds.add(member.id);
+      } else if (record.status === 'Absent') {
+        if (!record.category) {
+          newErrorIds.add(member.id);
+        } else {
+          const availableReasons = getFilteredReasons(record.category);
+          if (availableReasons.length > 0 && !record.reason_id) {
+            newErrorIds.add(member.id);
+          }
+        }
       }
     }
 
@@ -241,7 +248,7 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
                               {categories.map(c => <option key={c} value={c}>{c}</option>)}
                             </select>
 
-                            {record.category && (
+                            {record.category && getFilteredReasons(record.category).length > 0 && (
                               <select 
                                 className={`w-full border rounded-lg p-2 text-sm focus:ring-slate-500 focus:border-slate-500 outline-none transition-colors font-medium ${(!record.reason_id && hasError) ? 'border-red-500/50 bg-red-950/20 text-red-400' : 'border-slate-800 bg-slate-900 text-slate-300'}`}
                                 value={record.reason_id || ''}
