@@ -1,7 +1,7 @@
 /* eslint-disable */
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
-import { Scissors, ChevronRight, Activity, Settings } from 'lucide-react';
+import { ChevronRight, Activity, Settings } from 'lucide-react';
 
 export const revalidate = 0; // Disable caching
 
@@ -71,8 +71,8 @@ export default async function Home() {
       <div className="max-w-7xl w-full bg-[#0a1120]/30 backdrop-blur-md p-8 sm:p-12 rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-slate-600/30 border-t-4 border-t-cyan-500 relative z-10">
         
         <div className="flex flex-col items-center mb-10">
-          <div className="bg-gradient-to-br from-cyan-400 to-blue-600 p-5 rounded-2xl mb-6 shadow-lg shadow-cyan-500/20">
-            <Scissors className="w-12 h-12 text-white" />
+          <div className="mb-6 shadow-[0_0_20px_rgba(6,182,212,0.3)] rounded-3xl overflow-hidden border-2 border-cyan-500/30 bg-slate-50 flex items-center justify-center">
+            <img src="/logo.png" alt="Sewing Department Logo" className="w-28 h-28 object-contain p-1" />
           </div>
           <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2 tracking-tight text-center">
             MAS MATRIX
