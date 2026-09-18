@@ -77,12 +77,17 @@ export default async function DailyStatus() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070b14] flex flex-col items-center py-12 px-4 font-sans text-slate-200 relative overflow-hidden">
-      {/* Ambient background blur */}
-      <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-pink-900/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div 
+      className="min-h-screen flex flex-col items-center py-12 px-4 sm:px-8 font-sans text-slate-200 relative overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed"
+      style={{ backgroundImage: 'url("/bg-fingerprint.png")' }}
+    >
+      {/* Dark overlay to ensure text readability */}
+      <div className="absolute inset-0 bg-[#070b14]/85 backdrop-blur-[2px]"></div>
 
-      <div className="max-w-5xl w-full relative z-10">
+      {/* Ambient background blur */}
+      <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-blue-900/20 rounded-full blur-[120px] pointer-events-none"></div>
+      
+      <div className="max-w-7xl w-full relative z-10">
         
         {/* Header */}
         <div className="flex justify-between items-start mb-8">

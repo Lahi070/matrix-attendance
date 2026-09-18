@@ -57,12 +57,17 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070b14] flex flex-col items-center justify-center p-4 font-sans text-slate-200 relative overflow-hidden">
-      {/* Ambient background blur */}
-      <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-cyan-900/10 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="fixed bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-purple-900/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div 
+      className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 font-sans text-slate-200 relative overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed"
+      style={{ backgroundImage: 'url("/bg-fingerprint.png")' }}
+    >
+      {/* Dark overlay to ensure text readability */}
+      <div className="absolute inset-0 bg-[#070b14]/80 backdrop-blur-[2px]"></div>
 
-      <div className="max-w-xl w-full bg-[#111827]/80 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.5)] border border-slate-700/50 border-t-4 border-t-cyan-500 relative z-10">
+      {/* Ambient background blur (optional now since we have bg image) */}
+      <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-cyan-900/20 rounded-full blur-[120px] pointer-events-none"></div>
+      
+      <div className="max-w-7xl w-full bg-[#111827]/60 backdrop-blur-2xl p-8 sm:p-12 rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-slate-700/50 border-t-4 border-t-cyan-500 relative z-10">
         
         <div className="flex flex-col items-center mb-10">
           <div className="bg-gradient-to-br from-cyan-400 to-blue-600 p-5 rounded-2xl mb-6 shadow-lg shadow-cyan-500/20">

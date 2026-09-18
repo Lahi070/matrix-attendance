@@ -143,27 +143,27 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 p-4 md:p-8 font-sans pb-20 text-slate-200">
-      <div className="max-w-5xl mx-auto bg-slate-900 rounded-2xl shadow-2xl shadow-black/50 overflow-hidden border border-slate-800">
+    <div className="w-full font-sans pb-20 text-slate-200">
+      <div className="max-w-7xl mx-auto bg-[#111827]/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-slate-700/50">
         
         {/* Header */}
-        <div className="bg-black p-6 md:px-10 md:py-8 text-white flex justify-between items-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-slate-800 rounded-full blur-3xl opacity-20 -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
+        <div className="bg-[#070b14]/50 border-b border-slate-700/50 p-6 md:px-10 md:py-8 text-white flex justify-between items-center relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 pointer-events-none"></div>
           <div className="relative z-10">
             <h1 className="text-3xl font-extrabold tracking-tight flex items-center gap-3">
               {moduleName}
             </h1>
-            <p className="text-slate-400 font-medium mt-1 tracking-wide">
+            <p className="text-cyan-400 font-medium mt-1 tracking-wide">
               ATTENDANCE &bull; {new Date().toLocaleDateString('en-GB')}
             </p>
           </div>
-          <Link href="/" className="relative z-10 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-4 py-2 rounded-lg transition-colors text-sm font-semibold flex items-center gap-2">
+          <Link href="/" className="relative z-10 bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-600 px-4 py-2 rounded-lg transition-colors text-sm font-semibold flex items-center gap-2">
             <ArrowLeft className="w-4 h-4" />
             Back
           </Link>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 md:p-10 bg-slate-900">
+        <form onSubmit={handleSubmit} className="p-6 md:p-10 bg-transparent">
           {error && (
             <div className="bg-red-950/30 border-l-4 border-red-500 p-4 mb-8 rounded-r-lg shadow-sm flex items-start gap-3 animate-pulse">
               <AlertCircle className="text-red-500 w-6 h-6 mt-0.5 shrink-0" />
