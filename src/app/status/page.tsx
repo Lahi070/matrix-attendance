@@ -147,7 +147,7 @@ export default async function DailyStatus() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Roles Summary */}
           <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group">
             <h2 className="text-lg font-bold text-slate-200 mb-4 border-b border-slate-700 pb-3 relative z-10 flex items-center gap-2">
@@ -166,6 +166,22 @@ export default async function DailyStatus() {
                   <span className={`font-bold text-lg ${item.color}`}>{item.count}</span>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Total Absentees Summary */}
+          <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group">
+            <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-3 relative z-10">
+              <h2 className="text-lg font-bold text-slate-200">Total Absentees</h2>
+              <div className="bg-red-500/10 border border-red-500/20 p-2 rounded-lg">
+                <Activity className="w-5 h-5 text-red-400" />
+              </div>
+            </div>
+            <div className="flex h-32 relative z-10">
+               <div className="flex-1 flex flex-col justify-center items-center bg-red-900/20 border border-red-500/30 rounded-2xl">
+                  <div className="text-6xl font-black text-red-400 mb-1">{maleAbsent + femaleAbsent}</div>
+                  <div className="text-red-500 font-bold text-xs uppercase tracking-widest mt-2">People Absent</div>
+               </div>
             </div>
           </div>
           
