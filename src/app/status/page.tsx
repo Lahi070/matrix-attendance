@@ -81,8 +81,8 @@ export default async function DailyStatus() {
       className="min-h-screen flex flex-col items-center py-12 px-4 sm:px-8 font-sans text-slate-200 relative overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed"
       style={{ backgroundImage: 'url("/bg-fingerprint.png")' }}
     >
-      {/* Dark overlay to ensure text readability */}
-      <div className="absolute inset-0 bg-[#070b14]/85 backdrop-blur-[2px]"></div>
+      {/* Light dark overlay to ensure text readability */}
+      <div className="absolute inset-0 bg-[#070b14]/40"></div>
 
       {/* Ambient background blur */}
       <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-blue-900/20 rounded-full blur-[120px] pointer-events-none"></div>
@@ -113,13 +113,13 @@ export default async function DailyStatus() {
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-            <div className="bg-[#111827]/80 backdrop-blur-xl p-6 rounded-2xl border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)] relative overflow-hidden group hover:border-blue-500/50 transition-all text-center">
+            <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl border border-blue-500/30 shadow-[0_0_15px_rgba(59,130,246,0.15)] relative overflow-hidden group hover:border-blue-500/50 transition-all text-center">
               <div className="absolute inset-0 bg-blue-500/5 group-hover:bg-blue-500/10 transition-colors"></div>
               <p className="text-sm font-bold text-slate-300 uppercase tracking-wider mb-2 relative z-10">Total Modules</p>
               <h3 className="text-5xl font-black text-blue-400 relative z-10">{total}</h3>
             </div>
             
-            <div className="bg-[#111827]/80 backdrop-blur-xl p-6 rounded-2xl border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] relative overflow-hidden group hover:border-emerald-500/50 transition-all text-center">
+            <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] relative overflow-hidden group hover:border-emerald-500/50 transition-all text-center">
               <div className="absolute inset-0 bg-emerald-500/5 group-hover:bg-emerald-500/10 transition-colors"></div>
               <div className="flex items-center justify-center gap-2 mb-2 relative z-10">
                 <p className="text-sm font-bold text-slate-300 uppercase tracking-wider">Completed</p>
@@ -128,7 +128,7 @@ export default async function DailyStatus() {
               <h3 className="text-5xl font-black text-emerald-400 relative z-10">{marked}</h3>
             </div>
 
-            <div className="bg-[#111827]/80 backdrop-blur-xl p-6 rounded-2xl border border-pink-500/30 shadow-[0_0_15px_rgba(236,72,153,0.15)] relative overflow-hidden group hover:border-pink-500/50 transition-all text-center">
+            <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl border border-pink-500/30 shadow-[0_0_15px_rgba(236,72,153,0.15)] relative overflow-hidden group hover:border-pink-500/50 transition-all text-center">
               <div className="absolute inset-0 bg-pink-500/5 group-hover:bg-pink-500/10 transition-colors"></div>
               <div className="flex items-center justify-center gap-2 mb-2 relative z-10">
                 <p className="text-sm font-bold text-slate-300 uppercase tracking-wider">Pending</p>

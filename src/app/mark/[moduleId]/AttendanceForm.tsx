@@ -144,7 +144,7 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
 
   return (
     <div className="w-full font-sans pb-20 text-slate-200">
-      <div className="max-w-7xl mx-auto bg-[#111827]/80 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden border border-slate-700/50">
+      <div className="max-w-7xl mx-auto bg-[#0a1120]/30 backdrop-blur-md rounded-3xl shadow-2xl overflow-hidden border border-slate-600/30">
         
         {/* Header */}
         <div className="bg-[#070b14]/50 border-b border-slate-700/50 p-6 md:px-10 md:py-8 text-white flex justify-between items-center relative overflow-hidden">

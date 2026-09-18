@@ -61,13 +61,14 @@ export default async function Home() {
       className="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 font-sans text-slate-200 relative overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed"
       style={{ backgroundImage: 'url("/bg-fingerprint.png")' }}
     >
-      {/* Dark overlay to ensure text readability */}
-      <div className="absolute inset-0 bg-[#070b14]/80 backdrop-blur-[2px]"></div>
+      {/* Light dark overlay to slightly dim the image, without blurring it */}
+      <div className="absolute inset-0 bg-[#070b14]/40"></div>
 
-      {/* Ambient background blur (optional now since we have bg image) */}
-      <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-cyan-900/20 rounded-full blur-[120px] pointer-events-none"></div>
+      {/* Ambient background blur */}
+      <div className="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] bg-cyan-900/30 rounded-full blur-[120px] pointer-events-none"></div>
       
-      <div className="max-w-7xl w-full bg-[#111827]/60 backdrop-blur-2xl p-8 sm:p-12 rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-slate-700/50 border-t-4 border-t-cyan-500 relative z-10">
+      {/* More transparent glass container */}
+      <div className="max-w-7xl w-full bg-[#0a1120]/30 backdrop-blur-md p-8 sm:p-12 rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-slate-600/30 border-t-4 border-t-cyan-500 relative z-10">
         
         <div className="flex flex-col items-center mb-10">
           <div className="bg-gradient-to-br from-cyan-400 to-blue-600 p-5 rounded-2xl mb-6 shadow-lg shadow-cyan-500/20">
@@ -100,7 +101,7 @@ export default async function Home() {
                   <Link 
                     key={mod.id} 
                     href={`/mark/${mod.id}`}
-                    className="group relative overflow-hidden bg-[#1f2937]/50 p-5 border border-slate-700/50 rounded-2xl hover:border-cyan-500/50 hover:bg-[#1f2937] hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col justify-center"
+                    className="group relative overflow-hidden bg-[#1f2937]/50 p-5 border border-slate-700/50 rounded-2xl hover:border-cyan-500/50 hover:bg-[#1f2937]/80 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)] transition-all duration-300 flex flex-col justify-center"
                   >
                     <div className="absolute -right-4 -bottom-4 w-20 h-20 bg-cyan-500/5 rounded-full blur-xl group-hover:bg-cyan-500/10 transition-colors duration-300"></div>
                     

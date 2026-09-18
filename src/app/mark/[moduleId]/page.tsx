@@ -44,8 +44,14 @@ export default async function MarkAttendancePage({ params }: { params: { moduleI
     .select('*');
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col items-center py-12 px-4 font-sans text-slate-200">
-      <div className="max-w-4xl w-full">
+    <div 
+      className="min-h-screen flex flex-col items-center py-12 px-4 sm:px-8 font-sans text-slate-200 relative overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed"
+      style={{ backgroundImage: 'url("/bg-fingerprint.png")' }}
+    >
+      {/* Light dark overlay to ensure text readability */}
+      <div className="absolute inset-0 bg-[#070b14]/40"></div>
+
+      <div className="max-w-7xl w-full relative z-10">
         <AttendanceForm 
           moduleId={moduleData.id}
           moduleName={moduleData.name}
