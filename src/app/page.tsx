@@ -73,10 +73,9 @@ export default async function Home() {
         <div className="flex flex-col items-center mb-10">
           <div className="mb-6 flex items-center justify-center drop-shadow-[0_0_15px_rgba(6,182,212,0.4)]">
             <img 
-              src="/logo.png" 
+              src="/logo_transparent.png" 
               alt="Sewing Department Logo" 
-              className="w-32 h-auto object-contain mix-blend-screen" 
-              style={{ filter: 'invert(1) hue-rotate(180deg) brightness(1.3) contrast(1.5)' }}
+              className="w-40 h-auto object-contain drop-shadow-[0_0_10px_rgba(6,182,212,0.8)]" 
             />
           </div>
           <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2 tracking-tight text-center">
