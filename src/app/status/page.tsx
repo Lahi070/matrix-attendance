@@ -65,8 +65,7 @@ export default async function DailyStatus() {
     'Inform leave': 0,
     'Not inform': 0,
     'Dutypay': 0,
-    'Half day': 0,
-    'Maternity': 0
+    'Half day': 0
   };
 
   const cadreCountByModule = (teamMembers || []).reduce((acc: Record<string, number>, member) => {
@@ -88,7 +87,7 @@ export default async function DailyStatus() {
       if (gender === 'Male') maleAbsent++;
       if (gender === 'Female') femaleAbsent++;
 
-      if (record.category) {
+      if (record.category && record.category !== 'Maternity') {
         categoryCounts[record.category] = (categoryCounts[record.category] || 0) + 1;
       }
     });
@@ -193,7 +192,6 @@ export default async function DailyStatus() {
             </h2>
             <div className="space-y-2 relative z-10 overflow-y-auto pr-2 custom-scrollbar flex-grow">
               {Object.entries(categoryCounts)
-                .filter(([cat]) => cat !== 'Maternity' || categoryCounts[cat] > 0) // only show maternity if > 0
                 .map(([category, count]) => {
                 let colorClass = "text-slate-300";
                 let bgClass = "bg-slate-700";
