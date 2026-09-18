@@ -29,7 +29,29 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
   const [errorIds, setErrorIds] = useState<Set<string>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const categories = ['Planning leave', 'Inform leave', 'Not inform leave', 'Dutypay', 'Half day'];
+  const categories = ['Planning leave', 'Inform leave', 'Maternity', 'Not inform leave', 'Dutypay', 'Half day'];
+
+  const getFilteredReasons = (category: string) => {
+    if (category === 'Maternity') {
+      return reasons.filter(r => r.reason_text.toLowerCase().includes('maternity'));
+    }
+
+    if (category === 'Inform leave') {
+      return reasons.filter(r => r.category === 'Inform leave' && !r.reason_text.toLowerCase().includes('maternity'));
+    }
+
+    if (category === 'Planning leave' || category === 'Dutypay') {
+      const ownReasons = reasons.filter(r => r.category === category);
+      const informReasons = reasons.filter(r => r.category === 'Inform leave' && !r.reason_text.toLowerCase().includes('maternity'));
+      
+      // Combine and filter out duplicates if any
+      const combined = [...ownReasons, ...informReasons];
+      const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+      return unique;
+    }
+
+    return reasons.filter(r => r.category === category);
+  };
 
   const handleStatusChange = (memberId: string, status: string) => {
     setAttendance((prev) => ({
@@ -226,8 +248,8 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
                                 onChange={(e) => handleReasonChange(member.id, e.target.value)}
                               >
                                 <option value="">-- Specific Reason --</option>
-                                {reasons.filter(r => r.category === record.category).map(r => (
-                                  <option key={r.id} value={r.id}>{r.reason_text}</option>
+                                {getFilteredReasons(record.category).map(r => (
+                                  <option key={`${r.id}-${record.category}`} value={r.id}>{r.reason_text}</option>
                                 ))}
                               </select>
                             )}

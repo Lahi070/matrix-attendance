@@ -6,11 +6,24 @@ import { Scissors, ChevronRight, Activity, Settings } from 'lucide-react';
 export const revalidate = 0; // Disable caching
 
 export default async function Home() {
-  const { data: modules, error } = await supabase
+  const { data: rawModules, error } = await supabase
     .from('modules')
     .select('*')
-    .eq('is_active', true)
-    .order('name');
+    .eq('is_active', true);
+
+  const modules = rawModules ? [...rawModules].sort((a, b) => {
+    const matchA = a.name.match(/^(\d+)/);
+    const matchB = b.name.match(/^(\d+)/);
+    if (matchA && matchB) {
+      const numA = parseInt(matchA[1], 10);
+      const numB = parseInt(matchB[1], 10);
+      if (numA !== numB) return numA - numB;
+      return a.name.localeCompare(b.name);
+    }
+    if (matchA) return -1;
+    if (matchB) return 1;
+    return a.name.localeCompare(b.name);
+  }) : [];
 
   const { data: teamMembers } = await supabase
     .from('team_members')
@@ -69,7 +82,7 @@ export default async function Home() {
             Select Your Module
           </p>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {modules && modules.length > 0 ? (
               modules
                 .filter(mod => {

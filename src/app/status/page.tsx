@@ -5,7 +5,20 @@ import { ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
 export const revalidate = 0;
 
 export default async function DailyStatus() {
-  const { data: modules } = await supabase.from('modules').select('*').eq('is_active', true).order('name');
+  const { data: rawModules } = await supabase.from('modules').select('*').eq('is_active', true);
+  const modules = rawModules ? [...rawModules].sort((a, b) => {
+    const matchA = a.name.match(/^(\d+)/);
+    const matchB = b.name.match(/^(\d+)/);
+    if (matchA && matchB) {
+      const numA = parseInt(matchA[1], 10);
+      const numB = parseInt(matchB[1], 10);
+      if (numA !== numB) return numA - numB;
+      return a.name.localeCompare(b.name);
+    }
+    if (matchA) return -1;
+    if (matchB) return 1;
+    return a.name.localeCompare(b.name);
+  }) : [];
   
   const today = new Date().toISOString().split('T')[0];
   const { data: attendance } = await supabase.from('attendance').select('module_id').eq('date', today);
@@ -124,7 +137,7 @@ export default async function DailyStatus() {
           Module Selection Panel
         </h2>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
           {modules
             ?.filter(mod => {
               const n = mod.name?.toLowerCase() || '';

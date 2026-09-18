@@ -10,7 +10,7 @@ export default function ManageReasons() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [reasons, setReasons] = useState<any[]>([]);
 
-  const categories = ['Planning leave', 'Inform leave', 'Not inform leave', 'Dutypay', 'Half day'];
+  const categories = ['Planning leave', 'Inform leave', 'Maternity', 'Not inform leave', 'Dutypay', 'Half day'];
 
   const fetchReasons = async () => {
     const { data } = await supabase.from('absence_reasons').select('*').order('category').order('reason_text');

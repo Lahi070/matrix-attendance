@@ -13,12 +13,27 @@ export default function ManageModules() {
   const [leader, setLeader] = useState('');
   const [loading, setLoading] = useState(true);
 
+  const sortModules = (mods: Module[]) => {
+    return [...mods].sort((a, b) => {
+      const matchA = a.name.match(/^(\d+)/);
+      const matchB = b.name.match(/^(\d+)/);
+      if (matchA && matchB) {
+        const numA = parseInt(matchA[1], 10);
+        const numB = parseInt(matchB[1], 10);
+        if (numA !== numB) return numA - numB;
+        return a.name.localeCompare(b.name);
+      }
+      if (matchA) return -1;
+      if (matchB) return 1;
+      return a.name.localeCompare(b.name);
+    });
+  };
+
   useEffect(() => {
-    // We can just call it
     const loadData = async () => {
       setLoading(true);
-      const { data } = await supabase.from('modules').select('*').order('name');
-      if (data) setModules(data);
+      const { data } = await supabase.from('modules').select('*');
+      if (data) setModules(sortModules(data));
       setLoading(false);
     };
     loadData();
@@ -26,8 +41,8 @@ export default function ManageModules() {
 
   const fetchModules = async () => {
     setLoading(true);
-    const { data } = await supabase.from('modules').select('*').order('name');
-    if (data) setModules(data);
+    const { data } = await supabase.from('modules').select('*');
+    if (data) setModules(sortModules(data));
     setLoading(false);
   };
 
