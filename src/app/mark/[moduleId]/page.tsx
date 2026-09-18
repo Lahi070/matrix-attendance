@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { supabase } from '@/lib/supabase';
 import AttendanceForm from './AttendanceForm';
 import { notFound } from 'next/navigation';

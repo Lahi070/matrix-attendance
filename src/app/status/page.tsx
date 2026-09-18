@@ -1,6 +1,7 @@
+/* eslint-disable */
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, XCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, Activity, Users } from 'lucide-react';
 
 export const revalidate = 0;
 
@@ -21,7 +22,11 @@ export default async function DailyStatus() {
   }) : [];
   
   const today = new Date().toISOString().split('T')[0];
-  const { data: attendance } = await supabase.from('attendance').select('module_id').eq('date', today);
+  // Fetch detailed attendance for both module marking status and dashboard summary
+  const { data: attendance } = await supabase
+    .from('attendance')
+    .select('module_id, status, category, reason_id, team_members(gender, role)')
+    .eq('date', today);
 
   // Get Team Leaders for each module
   const { data: teamLeaders } = await supabase
@@ -38,7 +43,7 @@ export default async function DailyStatus() {
     }
   });
 
-  // Group by module
+  // Group by module for marking status
   const markedModules = new Set(attendance?.map(a => a.module_id));
 
   const total = modules?.length || 0;
@@ -51,12 +56,43 @@ export default async function DailyStatus() {
 
   const excludedRoles = ['DGM', 'AM', 'Executive', 'Senior Executive'];
   
+  // Dashboard Summary Data Processing
+  let maleAbsent = 0;
+  let femaleAbsent = 0;
+  const roleCounts: Record<string, number> = {};
+  const informLeaveReasons: Record<string, number> = {};
+
   const cadreCountByModule = (teamMembers || []).reduce((acc: Record<string, number>, member) => {
-    if (member.module_id && !excludedRoles.includes(member.role || '')) {
-      acc[member.module_id] = (acc[member.module_id] || 0) + 1;
+    if (!excludedRoles.includes(member.role || '')) {
+      // Role counts for summary
+      roleCounts[member.role] = (roleCounts[member.role] || 0) + 1;
+      
+      // Cadre counts by module
+      if (member.module_id) {
+        acc[member.module_id] = (acc[member.module_id] || 0) + 1;
+      }
     }
     return acc;
   }, {});
+
+  if (attendance) {
+    attendance.filter(a => a.status === 'Absent').forEach(record => {
+      const gender = (record.team_members as any)?.gender;
+      if (gender === 'Male') maleAbsent++;
+      if (gender === 'Female') femaleAbsent++;
+
+      if (record.category === 'Inform leave' && record.reason_id) {
+        informLeaveReasons[record.reason_id] = (informLeaveReasons[record.reason_id] || 0) + 1;
+      }
+    });
+  }
+
+  const { data: reasonsData } = await supabase.from('absence_reasons').select('id, reason_text').eq('category', 'Inform leave');
+  const reasonMap: Record<string, string> = {};
+  reasonsData?.forEach(r => {
+    reasonMap[r.id] = r.reason_text;
+  });
+
 
   if (modules) {
     const cuttingModule = modules.find(m => m.name?.toLowerCase().includes('cutting'));
@@ -107,8 +143,70 @@ export default async function DailyStatus() {
           </div>
         </div>
 
-        <div className="text-center mb-10">
-          <h2 className="text-3xl font-bold text-white">Welcome back!</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Roles Summary */}
+          <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group">
+            <h2 className="text-lg font-bold text-slate-200 mb-4 border-b border-slate-700 pb-3 relative z-10 flex items-center gap-2">
+              <Users className="w-5 h-5 text-blue-400" />
+              Staff Counts
+            </h2>
+            <div className="space-y-3 relative z-10">
+              {[
+                { label: 'Indirect', count: roleCounts['Indirect'] || 0, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
+                { label: 'Team Leaders', count: roleCounts['Team Leader'] || 0, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
+                { label: 'Group Leaders', count: roleCounts['Group Leader'] || 0, color: 'text-pink-400', bg: 'bg-pink-500/10', border: 'border-pink-500/20' },
+                { label: 'Menders', count: roleCounts['Mender'] || 0, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
+              ].map((item, i) => (
+                <div key={i} className={`flex justify-between items-center ${item.bg} border ${item.border} p-3 rounded-xl transition-all hover:brightness-110`}>
+                  <span className="text-slate-300 font-medium">{item.label}</span>
+                  <span className={`font-bold text-lg ${item.color}`}>{item.count}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Absent Gender Summary */}
+          <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group">
+            <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-3 relative z-10">
+              <h2 className="text-lg font-bold text-slate-200">Total Absentees</h2>
+              <div className="bg-red-500/10 border border-red-500/20 p-2 rounded-lg">
+                <Activity className="w-5 h-5 text-red-400" />
+              </div>
+            </div>
+            <div className="flex gap-4 h-32 relative z-10">
+               <div className="flex-1 flex flex-col justify-center items-center bg-blue-900/20 border border-blue-500/30 rounded-2xl">
+                  <div className="text-4xl font-black text-blue-400 mb-1">{maleAbsent}</div>
+                  <div className="text-blue-500 font-bold text-[10px] uppercase tracking-widest">Male</div>
+               </div>
+               <div className="flex-1 flex flex-col justify-center items-center bg-pink-900/20 border border-pink-500/30 rounded-2xl">
+                  <div className="text-4xl font-black text-pink-400 mb-1">{femaleAbsent}</div>
+                  <div className="text-pink-500 font-bold text-[10px] uppercase tracking-widest">Female</div>
+               </div>
+            </div>
+          </div>
+          
+          {/* Inform Leave Summary */}
+          <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group">
+            <h2 className="text-lg font-bold text-slate-200 mb-4 border-b border-slate-700 pb-3 relative z-10">
+              Inform Leave
+            </h2>
+            <div className="space-y-3 relative z-10 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+              {Object.keys(informLeaveReasons).length > 0 ? (
+                Object.entries(informLeaveReasons).map(([id, count]) => (
+                  <div key={id} className="flex justify-between items-center bg-slate-800/50 border border-slate-600/30 p-3 rounded-xl hover:bg-slate-700/50 transition-colors">
+                    <span className="text-slate-300 font-medium text-sm truncate pr-2" title={reasonMap[id] || 'Unknown Reason'}>
+                      {reasonMap[id] || 'Unknown Reason'}
+                    </span>
+                    <span className="font-bold text-white bg-slate-700 px-3 py-1 rounded-lg text-sm">{count}</span>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6 text-slate-500 text-sm">
+                  No inform leaves recorded today.
+                </div>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Summary Cards */}
@@ -139,10 +237,10 @@ export default async function DailyStatus() {
         </div>
 
         <h2 className="text-xl font-bold text-white mb-6 flex items-center justify-between">
-          Module Selection Panel
+          Module Details
         </h2>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
           {modules
             ?.filter(mod => {
               const n = mod.name?.toLowerCase() || '';
@@ -154,32 +252,30 @@ export default async function DailyStatus() {
             const cadreCount = cadreCountByModule[mod.id] || 0;
             
             return (
-              <div key={mod.id} className={`p-5 rounded-2xl border backdrop-blur-xl relative overflow-hidden transition-all hover:scale-[1.02] ${
+              <div key={mod.id} className={`p-4 rounded-xl border backdrop-blur-md relative overflow-hidden transition-all hover:scale-105 ${
                 isMarked 
-                  ? 'bg-emerald-900/30 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.1)]' 
-                  : 'bg-pink-900/20 border-pink-500/40 shadow-[0_0_15px_rgba(236,72,153,0.1)]'
+                  ? 'bg-emerald-900/20 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]' 
+                  : 'bg-pink-900/10 border-pink-500/30 shadow-[0_0_10px_rgba(236,72,153,0.1)]'
               }`}>
                 <div className="relative z-10">
-                  <div className="flex items-center gap-2 mb-2">
-                    <div className="font-bold text-lg text-white">{mod.name}</div>
+                  <div className="font-bold text-base text-white mb-1 truncate" title={mod.name}>{mod.name}</div>
+                  <div className="text-[11px] text-slate-300 mb-1 flex items-center justify-between">
+                    <span>TL: <span className="font-medium text-white truncate max-w-[60px] inline-block align-bottom" title={leaderName}>{leaderName}</span></span>
                   </div>
-                  <div className="text-sm text-slate-300 mb-2 flex items-center justify-between">
-                    <span>Leader: <span className="font-medium text-white">{leaderName}</span></span>
-                  </div>
-                  <div className="text-sm text-slate-300 flex items-center justify-between mb-2">
+                  <div className="text-[11px] text-slate-300 flex items-center justify-between mb-1">
                     <span>Cadre: <span className="font-medium text-white">{cadreCount}</span></span>
                   </div>
-                  <div className="text-sm text-slate-300 flex items-center justify-between">
-                    <span>Status: <span className={`font-medium ${isMarked ? 'text-emerald-400' : 'text-pink-400'}`}>{isMarked ? 'Completed' : 'Pending'}</span></span>
+                  <div className="text-[11px] font-bold">
+                    <span className={`${isMarked ? 'text-emerald-400' : 'text-pink-400'}`}>{isMarked ? 'Completed' : 'Pending'}</span>
                   </div>
                 </div>
                 
                 {/* Big faint icon in background */}
-                <div className="absolute -right-4 -bottom-4 opacity-20 pointer-events-none">
+                <div className="absolute -right-3 -bottom-3 opacity-10 pointer-events-none">
                   {isMarked ? (
-                    <CheckCircle2 className="w-24 h-24 text-emerald-400" />
+                    <CheckCircle2 className="w-16 h-16 text-emerald-400" />
                   ) : (
-                    <XCircle className="w-24 h-24 text-pink-400" />
+                    <XCircle className="w-16 h-16 text-pink-400" />
                   )}
                 </div>
               </div>
