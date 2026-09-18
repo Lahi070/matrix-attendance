@@ -71,8 +71,13 @@ export default async function Home() {
       <div className="max-w-7xl w-full bg-[#0a1120]/30 backdrop-blur-md p-8 sm:p-12 rounded-3xl shadow-[0_0_40px_rgba(0,0,0,0.8)] border border-slate-600/30 border-t-4 border-t-cyan-500 relative z-10">
         
         <div className="flex flex-col items-center mb-10">
-          <div className="mb-6 shadow-[0_0_20px_rgba(6,182,212,0.3)] rounded-3xl overflow-hidden border-2 border-cyan-500/30 bg-slate-50 flex items-center justify-center">
-            <img src="/logo.png" alt="Sewing Department Logo" className="w-28 h-28 object-contain p-1" />
+          <div className="mb-6 shadow-[0_0_30px_rgba(6,182,212,0.3)] rounded-full overflow-hidden border-2 border-cyan-500/40 bg-[#0a1428] flex items-center justify-center">
+            <img 
+              src="/logo.png" 
+              alt="Sewing Department Logo" 
+              className="w-32 h-32 object-cover mix-blend-screen scale-110" 
+              style={{ filter: 'invert(1) sepia(1) saturate(5) hue-rotate(175deg) brightness(1.2) contrast(1.2)' }}
+            />
           </div>
           <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-2 tracking-tight text-center">
             MAS MATRIX
