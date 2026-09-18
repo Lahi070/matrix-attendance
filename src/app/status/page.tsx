@@ -60,7 +60,14 @@ export default async function DailyStatus() {
   let maleAbsent = 0;
   let femaleAbsent = 0;
   const roleCounts: Record<string, number> = {};
-  const informLeaveReasons: Record<string, number> = {};
+  const categoryCounts: Record<string, number> = {
+    'Planning leave': 0,
+    'Inform leave': 0,
+    'Not inform': 0,
+    'Dutypay': 0,
+    'Half day': 0,
+    'Maternity': 0
+  };
 
   const cadreCountByModule = (teamMembers || []).reduce((acc: Record<string, number>, member) => {
     if (!excludedRoles.includes(member.role || '')) {
@@ -81,17 +88,11 @@ export default async function DailyStatus() {
       if (gender === 'Male') maleAbsent++;
       if (gender === 'Female') femaleAbsent++;
 
-      if (record.category === 'Inform leave' && record.reason_id) {
-        informLeaveReasons[record.reason_id] = (informLeaveReasons[record.reason_id] || 0) + 1;
+      if (record.category) {
+        categoryCounts[record.category] = (categoryCounts[record.category] || 0) + 1;
       }
     });
   }
-
-  const { data: reasonsData } = await supabase.from('absence_reasons').select('id, reason_text').eq('category', 'Inform leave');
-  const reasonMap: Record<string, string> = {};
-  reasonsData?.forEach(r => {
-    reasonMap[r.id] = r.reason_text;
-  });
 
 
   if (modules) {
@@ -185,26 +186,41 @@ export default async function DailyStatus() {
             </div>
           </div>
           
-          {/* Inform Leave Summary */}
-          <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group">
-            <h2 className="text-lg font-bold text-slate-200 mb-4 border-b border-slate-700 pb-3 relative z-10">
-              Inform Leave
+          {/* Absence Categories Summary */}
+          <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group flex flex-col">
+            <h2 className="text-lg font-bold text-slate-200 mb-4 border-b border-slate-700 pb-3 relative z-10 flex-shrink-0">
+              Absence Breakdown
             </h2>
-            <div className="space-y-3 relative z-10 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-              {Object.keys(informLeaveReasons).length > 0 ? (
-                Object.entries(informLeaveReasons).map(([id, count]) => (
-                  <div key={id} className="flex justify-between items-center bg-slate-800/50 border border-slate-600/30 p-3 rounded-xl hover:bg-slate-700/50 transition-colors">
-                    <span className="text-slate-300 font-medium text-sm truncate pr-2" title={reasonMap[id] || 'Unknown Reason'}>
-                      {reasonMap[id] || 'Unknown Reason'}
+            <div className="space-y-2 relative z-10 overflow-y-auto pr-2 custom-scrollbar flex-grow">
+              {Object.entries(categoryCounts)
+                .filter(([cat]) => cat !== 'Maternity' || categoryCounts[cat] > 0) // only show maternity if > 0
+                .map(([category, count]) => {
+                let colorClass = "text-slate-300";
+                let bgClass = "bg-slate-700";
+                
+                if (category === 'Not inform') {
+                  colorClass = "text-red-400";
+                  bgClass = "bg-red-500/20 text-red-300";
+                } else if (category === 'Inform leave' || category === 'Planning leave') {
+                  colorClass = "text-blue-400";
+                  bgClass = "bg-blue-500/20 text-blue-300";
+                } else if (category === 'Dutypay') {
+                  colorClass = "text-emerald-400";
+                  bgClass = "bg-emerald-500/20 text-emerald-300";
+                } else if (category === 'Half day') {
+                  colorClass = "text-amber-400";
+                  bgClass = "bg-amber-500/20 text-amber-300";
+                }
+
+                return (
+                  <div key={category} className="flex justify-between items-center bg-slate-800/50 border border-slate-600/30 p-2.5 rounded-xl hover:bg-slate-700/50 transition-colors">
+                    <span className={`font-medium text-sm truncate pr-2 ${colorClass}`} title={category}>
+                      {category}
                     </span>
-                    <span className="font-bold text-white bg-slate-700 px-3 py-1 rounded-lg text-sm">{count}</span>
+                    <span className={`font-bold px-3 py-1 rounded-lg text-sm ${bgClass}`}>{count}</span>
                   </div>
-                ))
-              ) : (
-                <div className="text-center py-6 text-slate-500 text-sm">
-                  No inform leaves recorded today.
-                </div>
-              )}
+                );
+              })}
             </div>
           </div>
         </div>
