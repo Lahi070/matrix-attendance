@@ -16,7 +16,7 @@ export default async function AdminDashboard() {
   const { data: attendanceData } = await supabase.from('attendance').select('status, category, reason_id, team_members(gender, role)').eq('date', today);
   
   const totalMarked = attendanceData?.length || 0;
-  const totalAbsent = attendanceData?.filter(a => a.status === 'Absent').length || 0;
+  const totalAbsent = attendanceData?.filter(a => a.status === 'Absent' && a.category !== 'Maternity').length || 0;
 
   let maleAbsent = 0;
   let femaleAbsent = 0;
@@ -31,8 +31,12 @@ export default async function AdminDashboard() {
   if (attendanceData) {
     attendanceData.filter(a => a.status === 'Absent').forEach(record => {
       const gender = (record.team_members as any)?.gender;
-      if (gender === 'Male') maleAbsent++;
-      if (gender === 'Female') femaleAbsent++;
+      
+      // Exclude Maternity from total absence count
+      if (record.category !== 'Maternity') {
+        if (gender === 'Male') maleAbsent++;
+        if (gender === 'Female') femaleAbsent++;
+      }
 
       if (record.category === 'Inform leave' && record.reason_id) {
         informLeaveReasons[record.reason_id] = (informLeaveReasons[record.reason_id] || 0) + 1;

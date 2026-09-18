@@ -84,8 +84,12 @@ export default async function DailyStatus() {
   if (attendance) {
     attendance.filter(a => a.status === 'Absent').forEach(record => {
       const gender = (record.team_members as any)?.gender;
-      if (gender === 'Male') maleAbsent++;
-      if (gender === 'Female') femaleAbsent++;
+      
+      // Exclude Maternity from total absence count
+      if (record.category !== 'Maternity') {
+        if (gender === 'Male') maleAbsent++;
+        if (gender === 'Female') femaleAbsent++;
+      }
 
       if (record.category && record.category !== 'Maternity') {
         categoryCounts[record.category] = (categoryCounts[record.category] || 0) + 1;
