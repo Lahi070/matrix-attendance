@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, XCircle, Activity, Users } from 'lucide-react';
 import AbsenceBreakdownPanel from './AbsenceBreakdownPanel';
 
+import WeeklyAbsenceChart from './WeeklyAbsenceChart';
+
 export const revalidate = 0;
 
 export default async function DailyStatus() {
@@ -23,11 +25,24 @@ export default async function DailyStatus() {
   }) : [];
   
   const today = new Date().toISOString().split('T')[0];
-  // Fetch detailed attendance for both module marking status and dashboard summary
+  
+  // Calculate date 12 weeks ago
+  const twelveWeeksAgo = new Date();
+  twelveWeeksAgo.setDate(twelveWeeksAgo.getDate() - 84);
+  const twelveWeeksAgoStr = twelveWeeksAgo.toISOString().split('T')[0];
+
+  // Fetch detailed attendance for today (for dashboard summary)
   const { data: attendance } = await supabase
     .from('attendance')
     .select('module_id, status, category, reason_id, team_members(gender, role)')
     .eq('date', today);
+
+  // Fetch historical attendance for the last 12 weeks
+  const { data: historicalAttendance } = await supabase
+    .from('attendance')
+    .select('date, status')
+    .gte('date', twelveWeeksAgoStr)
+    .lte('date', today);
 
   // Get Team Leaders for each module
   const { data: teamLeaders } = await supabase
@@ -62,6 +77,45 @@ export default async function DailyStatus() {
   let femaleAbsent = 0;
   let directAbsent = 0;
   let indirectAbsent = 0;
+
+  // Process historical data for chart
+  const weeklyDataMap = new Map<string, { total: number, absent: number }>();
+  
+  if (historicalAttendance) {
+    historicalAttendance.forEach(record => {
+      const dateObj = new Date(record.date);
+      // ISO Week calculation
+      const d = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
+      const dayNum = d.getUTCDay() || 7;
+      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+      const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+      const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1)/7);
+      
+      const weekLabel = `W${weekNo}`;
+      
+      if (!weeklyDataMap.has(weekLabel)) {
+        weeklyDataMap.set(weekLabel, { total: 0, absent: 0 });
+      }
+      
+      const weekStats = weeklyDataMap.get(weekLabel)!;
+      weekStats.total += 1;
+      if (record.status === 'Absent') {
+        weekStats.absent += 1;
+      }
+    });
+  }
+
+  const weeklyChartData = Array.from(weeklyDataMap.entries())
+    .map(([week, stats]) => ({
+      week,
+      percentage: stats.total > 0 ? Number(((stats.absent / stats.total) * 100).toFixed(1)) : 0
+    }))
+    // Sort by week number
+    .sort((a, b) => {
+      const wA = parseInt(a.week.replace('W', ''));
+      const wB = parseInt(b.week.replace('W', ''));
+      return wA - wB;
+    });
 
   const roleCounts: Record<string, number> = {};
   const categoryCounts: Record<string, number> = {
@@ -189,6 +243,8 @@ export default async function DailyStatus() {
             indirectCounts={indirectCounts} 
           />
         </div>
+
+        <WeeklyAbsenceChart data={weeklyChartData} />
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
