@@ -167,40 +167,18 @@ export default async function DailyStatus() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-          {/* Roles Summary */}
-          <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group">
-            <h2 className="text-lg font-bold text-slate-200 mb-4 border-b border-slate-700 pb-3 relative z-10 flex items-center gap-2">
-              <Users className="w-5 h-5 text-blue-400" />
-              Staff Counts
-            </h2>
-            <div className="space-y-3 relative z-10">
-              {[
-                { label: 'Indirect', count: roleCounts['Indirect'] || 0, color: 'text-blue-400', bg: 'bg-blue-500/10', border: 'border-blue-500/20' },
-                { label: 'Team Leaders', count: roleCounts['Team Leader'] || 0, color: 'text-purple-400', bg: 'bg-purple-500/10', border: 'border-purple-500/20' },
-                { label: 'Group Leaders', count: roleCounts['Group Leader'] || 0, color: 'text-pink-400', bg: 'bg-pink-500/10', border: 'border-pink-500/20' },
-                { label: 'Menders', count: roleCounts['Mender'] || 0, color: 'text-emerald-400', bg: 'bg-emerald-500/10', border: 'border-emerald-500/20' },
-              ].map((item, i) => (
-                <div key={i} className={`flex justify-between items-center ${item.bg} border ${item.border} p-3 rounded-xl transition-all hover:brightness-110`}>
-                  <span className="text-slate-300 font-medium">{item.label}</span>
-                  <span className={`font-bold text-lg ${item.color}`}>{item.count}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Total Absentees Summary */}
-          <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group flex flex-col">
-            <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-3 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">          {/* Total Absentees Summary */}
+          <div className="bg-[#111827]/40 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group flex flex-col">
+            <div className="flex justify-between items-center mb-3 border-b border-slate-700 pb-2 relative z-10">
               <h2 className="text-lg font-bold text-slate-200">Total Absentees</h2>
               <div className="bg-red-500/10 border border-red-500/20 p-2 rounded-lg">
                 <Activity className="w-5 h-5 text-red-400" />
               </div>
             </div>
-            <div className="flex h-32 relative z-10">
-               <div className="flex-1 flex flex-col justify-center items-center bg-red-900/20 border border-red-500/30 rounded-2xl py-4">
-                  <div className="text-6xl font-black text-red-400 mb-1">{maleAbsent + femaleAbsent}</div>
-                  <div className="text-red-500 font-bold text-xs uppercase tracking-widest mt-2">Total Absent</div>
+            <div className="flex flex-grow relative z-10">
+               <div className="flex-1 flex flex-col justify-center items-center bg-red-900/20 border border-red-500/30 rounded-xl py-3">
+                  <div className="text-5xl font-black text-red-400 mb-1">{maleAbsent + femaleAbsent}</div>
+                  <div className="text-red-500 font-bold text-[10px] uppercase tracking-widest mt-1">Total Absent</div>
                </div>
             </div>
           </div>
