@@ -158,7 +158,7 @@ export default async function DailyStatus() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
           {/* Roles Summary */}
           <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group">
             <h2 className="text-lg font-bold text-slate-200 mb-4 border-b border-slate-700 pb-3 relative z-10 flex items-center gap-2">
@@ -188,14 +188,20 @@ export default async function DailyStatus() {
                 <Activity className="w-5 h-5 text-red-400" />
               </div>
             </div>
-            <div className="flex gap-4 mb-4 relative z-10">
+            <div className="flex h-32 relative z-10">
                <div className="flex-1 flex flex-col justify-center items-center bg-red-900/20 border border-red-500/30 rounded-2xl py-4">
-                  <div className="text-5xl font-black text-red-400 mb-1">{maleAbsent + femaleAbsent}</div>
-                  <div className="text-red-500 font-bold text-[10px] uppercase tracking-widest mt-1">Total Absent</div>
+                  <div className="text-6xl font-black text-red-400 mb-1">{maleAbsent + femaleAbsent}</div>
+                  <div className="text-red-500 font-bold text-xs uppercase tracking-widest mt-2">Total Absent</div>
                </div>
             </div>
-            
-            <div className="space-y-2 relative z-10 mt-auto">
+          </div>
+
+          {/* Labor Breakdown */}
+          <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group flex flex-col">
+            <h2 className="text-lg font-bold text-slate-200 mb-4 border-b border-slate-700 pb-3 relative z-10 flex-shrink-0">
+              Labor Breakdown
+            </h2>
+            <div className="space-y-2 relative z-10 overflow-y-auto pr-2 custom-scrollbar flex-grow">
               <div className="flex justify-between items-center bg-slate-800/50 border border-slate-600/30 p-2.5 rounded-xl hover:bg-slate-700/50 transition-colors">
                 <span className="font-medium text-sm text-indigo-400 truncate pr-2">Direct</span>
                 <span className="font-bold px-3 py-1 rounded-lg text-sm bg-indigo-500/20 text-indigo-300">{directAbsent}</span>
