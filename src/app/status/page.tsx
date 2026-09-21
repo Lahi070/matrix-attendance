@@ -59,6 +59,9 @@ export default async function DailyStatus() {
   // Dashboard Summary Data Processing
   let maleAbsent = 0;
   let femaleAbsent = 0;
+  let directAbsent = 0;
+  let indirectAbsent = 0;
+
   const roleCounts: Record<string, number> = {};
   const categoryCounts: Record<string, number> = {
     'Planning leave': 0,
@@ -83,12 +86,20 @@ export default async function DailyStatus() {
 
   if (attendance) {
     attendance.filter(a => a.status === 'Absent').forEach(record => {
-      const gender = (record.team_members as any)?.gender;
+      const teamMember = record.team_members as any;
+      const gender = teamMember?.gender;
+      const role = teamMember?.role;
       
       // Exclude Maternity from total absence count
       if (record.category !== 'Maternity') {
         if (gender === 'Male') maleAbsent++;
         if (gender === 'Female') femaleAbsent++;
+        
+        if (role === 'Indirect') {
+          indirectAbsent++;
+        } else if (role && !excludedRoles.includes(role)) {
+          directAbsent++;
+        }
       }
 
       if (record.category && record.category !== 'Maternity') {
@@ -170,18 +181,29 @@ export default async function DailyStatus() {
           </div>
 
           {/* Total Absentees Summary */}
-          <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group">
+          <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group flex flex-col">
             <div className="flex justify-between items-center mb-4 border-b border-slate-700 pb-3 relative z-10">
               <h2 className="text-lg font-bold text-slate-200">Total Absentees</h2>
               <div className="bg-red-500/10 border border-red-500/20 p-2 rounded-lg">
                 <Activity className="w-5 h-5 text-red-400" />
               </div>
             </div>
-            <div className="flex h-32 relative z-10">
-               <div className="flex-1 flex flex-col justify-center items-center bg-red-900/20 border border-red-500/30 rounded-2xl">
-                  <div className="text-6xl font-black text-red-400 mb-1">{maleAbsent + femaleAbsent}</div>
-                  <div className="text-red-500 font-bold text-xs uppercase tracking-widest mt-2">People Absent</div>
+            <div className="flex gap-4 mb-4 relative z-10">
+               <div className="flex-1 flex flex-col justify-center items-center bg-red-900/20 border border-red-500/30 rounded-2xl py-4">
+                  <div className="text-5xl font-black text-red-400 mb-1">{maleAbsent + femaleAbsent}</div>
+                  <div className="text-red-500 font-bold text-[10px] uppercase tracking-widest mt-1">Total Absent</div>
                </div>
+            </div>
+            
+            <div className="space-y-2 relative z-10 mt-auto">
+              <div className="flex justify-between items-center bg-slate-800/50 border border-slate-600/30 p-2.5 rounded-xl hover:bg-slate-700/50 transition-colors">
+                <span className="font-medium text-sm text-indigo-400 truncate pr-2">Direct</span>
+                <span className="font-bold px-3 py-1 rounded-lg text-sm bg-indigo-500/20 text-indigo-300">{directAbsent}</span>
+              </div>
+              <div className="flex justify-between items-center bg-slate-800/50 border border-slate-600/30 p-2.5 rounded-xl hover:bg-slate-700/50 transition-colors">
+                <span className="font-medium text-sm text-cyan-400 truncate pr-2">Indirect</span>
+                <span className="font-bold px-3 py-1 rounded-lg text-sm bg-cyan-500/20 text-cyan-300">{indirectAbsent}</span>
+              </div>
             </div>
           </div>
           
