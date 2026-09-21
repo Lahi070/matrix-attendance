@@ -2,6 +2,7 @@
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, XCircle, Activity, Users } from 'lucide-react';
+import AbsenceBreakdownPanel from './AbsenceBreakdownPanel';
 
 export const revalidate = 0;
 
@@ -70,6 +71,8 @@ export default async function DailyStatus() {
     'Dutypay': 0,
     'Half day': 0
   };
+  const directCounts: Record<string, number> = { ...categoryCounts };
+  const indirectCounts: Record<string, number> = { ...categoryCounts };
 
   const cadreCountByModule = (teamMembers || []).reduce((acc: Record<string, number>, member) => {
     if (!excludedRoles.includes(member.role || '')) {
@@ -104,6 +107,12 @@ export default async function DailyStatus() {
 
       if (record.category && record.category !== 'Maternity') {
         categoryCounts[record.category] = (categoryCounts[record.category] || 0) + 1;
+        
+        if (role === 'Indirect') {
+          indirectCounts[record.category] = (indirectCounts[record.category] || 0) + 1;
+        } else if (role && !excludedRoles.includes(role)) {
+          directCounts[record.category] = (directCounts[record.category] || 0) + 1;
+        }
       }
     });
   }
@@ -158,7 +167,7 @@ export default async function DailyStatus() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           {/* Roles Summary */}
           <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group">
             <h2 className="text-lg font-bold text-slate-200 mb-4 border-b border-slate-700 pb-3 relative z-10 flex items-center gap-2">
@@ -196,59 +205,11 @@ export default async function DailyStatus() {
             </div>
           </div>
 
-          {/* Labor Breakdown */}
-          <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group flex flex-col">
-            <h2 className="text-lg font-bold text-slate-200 mb-4 border-b border-slate-700 pb-3 relative z-10 flex-shrink-0">
-              Labor Breakdown
-            </h2>
-            <div className="space-y-2 relative z-10 overflow-y-auto pr-2 custom-scrollbar flex-grow">
-              <div className="flex justify-between items-center bg-slate-800/50 border border-slate-600/30 p-2.5 rounded-xl hover:bg-slate-700/50 transition-colors">
-                <span className="font-medium text-sm text-indigo-400 truncate pr-2">Direct</span>
-                <span className="font-bold px-3 py-1 rounded-lg text-sm bg-indigo-500/20 text-indigo-300">{directAbsent}</span>
-              </div>
-              <div className="flex justify-between items-center bg-slate-800/50 border border-slate-600/30 p-2.5 rounded-xl hover:bg-slate-700/50 transition-colors">
-                <span className="font-medium text-sm text-cyan-400 truncate pr-2">Indirect</span>
-                <span className="font-bold px-3 py-1 rounded-lg text-sm bg-cyan-500/20 text-cyan-300">{indirectAbsent}</span>
-              </div>
-            </div>
-          </div>
-          
-          {/* Absence Categories Summary */}
-          <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group flex flex-col">
-            <h2 className="text-lg font-bold text-slate-200 mb-4 border-b border-slate-700 pb-3 relative z-10 flex-shrink-0">
-              Absence Breakdown
-            </h2>
-            <div className="space-y-2 relative z-10 overflow-y-auto pr-2 custom-scrollbar flex-grow">
-              {Object.entries(categoryCounts)
-                .map(([category, count]) => {
-                let colorClass = "text-slate-300";
-                let bgClass = "bg-slate-700";
-                
-                if (category === 'Not inform') {
-                  colorClass = "text-red-400";
-                  bgClass = "bg-red-500/20 text-red-300";
-                } else if (category === 'Inform leave' || category === 'Planning leave') {
-                  colorClass = "text-blue-400";
-                  bgClass = "bg-blue-500/20 text-blue-300";
-                } else if (category === 'Dutypay') {
-                  colorClass = "text-emerald-400";
-                  bgClass = "bg-emerald-500/20 text-emerald-300";
-                } else if (category === 'Half day') {
-                  colorClass = "text-amber-400";
-                  bgClass = "bg-amber-500/20 text-amber-300";
-                }
-
-                return (
-                  <div key={category} className="flex justify-between items-center bg-slate-800/50 border border-slate-600/30 p-2.5 rounded-xl hover:bg-slate-700/50 transition-colors">
-                    <span className={`font-medium text-sm truncate pr-2 ${colorClass}`} title={category}>
-                      {category}
-                    </span>
-                    <span className={`font-bold px-3 py-1 rounded-lg text-sm ${bgClass}`}>{count}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
+          <AbsenceBreakdownPanel 
+            totalCounts={categoryCounts} 
+            directCounts={directCounts} 
+            indirectCounts={indirectCounts} 
+          />
         </div>
 
         {/* Summary Cards */}
