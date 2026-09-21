@@ -100,7 +100,7 @@ export default async function DailyStatus() {
         
         if (role === 'Indirect') {
           indirectAbsent++;
-        } else if (role && !excludedRoles.includes(role)) {
+        } else if (!role || !excludedRoles.includes(role)) {
           directAbsent++;
         }
       }
@@ -110,7 +110,7 @@ export default async function DailyStatus() {
         
         if (role === 'Indirect') {
           indirectCounts[record.category] = (indirectCounts[record.category] || 0) + 1;
-        } else if (role && !excludedRoles.includes(role)) {
+        } else if (!role || !excludedRoles.includes(role)) {
           directCounts[record.category] = (directCounts[record.category] || 0) + 1;
         }
       }
