@@ -47,7 +47,6 @@ export default async function DailyStatus() {
     .select('date, status')
     .limit(100000);
 
-  // Get Team Leaders for each module
   const { data: teamLeaders } = await supabase
     .from('team_members')
     .select('name, module_id')
@@ -61,6 +60,20 @@ export default async function DailyStatus() {
       leaderMap[tl.module_id] = tl.name;
     }
   });
+
+  // Fetch db total cadre (excluding management)
+  const { count: dbTotal } = await supabase
+    .from('team_members')
+    .select('*', { count: 'exact', head: true })
+    .not('role', 'in', '("DGM","AM","Executive","Senior Executive")');
+
+  // Fetch manual cadre from settings
+  const { data: settings } = await supabase
+    .from('system_settings')
+    .select('manual_cadre')
+    .eq('id', 1)
+    .single();
+  const manualCadre = settings?.manual_cadre || 0;
 
   // Group by module for marking status
   const markedModules = new Set(attendance?.map(a => a.module_id));
@@ -272,7 +285,8 @@ export default async function DailyStatus() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">          {/* Total Absentees Summary */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Total Absentees Summary */}
           <div className="bg-[#111827]/40 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group flex flex-col">
             <div className="flex justify-between items-center mb-3 border-b border-slate-700 pb-2 relative z-10">
               <h2 className="text-lg font-bold text-slate-200">Total Absentees</h2>
@@ -280,10 +294,20 @@ export default async function DailyStatus() {
                 <Activity className="w-5 h-5 text-red-400" />
               </div>
             </div>
-            <div className="flex flex-grow relative z-10">
+            <div className="flex flex-grow relative z-10 gap-4">
                <div className="flex-1 flex flex-col justify-center items-center bg-red-900/20 border border-red-500/30 rounded-xl py-3">
                   <div className="text-5xl font-black text-red-400 mb-1">{maleAbsent + femaleAbsent}</div>
                   <div className="text-red-500 font-bold text-[10px] uppercase tracking-widest mt-1">Total Absent</div>
+               </div>
+               
+               {/* Absence Percentage Section (using manual cadre logic from Admin) */}
+               <div className="flex-1 flex flex-col justify-center items-center bg-pink-900/20 border border-pink-500/30 rounded-xl py-3">
+                  <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-red-500 mb-1">
+                    {manualCadre > 0 || (dbTotal && dbTotal > 0) 
+                      ? (((maleAbsent + femaleAbsent) / (manualCadre > 0 ? manualCadre : (dbTotal || 0))) * 100).toFixed(1) 
+                      : '0.0'}%
+                  </div>
+                  <div className="text-pink-500 font-bold text-[10px] uppercase tracking-widest mt-1">Absence %</div>
                </div>
             </div>
           </div>
