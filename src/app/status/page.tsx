@@ -34,8 +34,12 @@ export default async function DailyStatus() {
   // Fetch detailed attendance for today (for dashboard summary)
   const { data: attendance } = await supabase
     .from('attendance')
-    .select('module_id, status, category, reason_id, team_members(gender, role), modules(name)')
+    .select('module_id, status, category, reason_id, team_members(gender, role)')
     .eq('date', today);
+
+  // Build a moduleId → moduleName lookup from already-fetched modules data
+  const moduleNameById: Record<string, string> = {};
+  (rawModules || []).forEach(m => { moduleNameById[m.id] = m.name; });
 
   // Fetch historical attendance for the last 12 weeks (and all data for daily stats)
   const { data: historicalAttendance } = await supabase
@@ -185,10 +189,10 @@ export default async function DailyStatus() {
   if (attendance) {
     attendance.filter(a => a.status === 'Absent').forEach(record => {
       const teamMember = record.team_members as any;
-      const moduleInfo = record.modules as any;
       const gender = teamMember?.gender;
       const role = teamMember?.role;
-      const moduleName: string | undefined = moduleInfo?.name;
+      // Use the pre-built lookup map — guaranteed to work without any join
+      const moduleName: string = moduleNameById[record.module_id] || '';
 
       // Indirect: regular Team Members in Cutting, Batch Preparation, Training Line modules
       // Direct: Team Leaders, Group Leaders, Menders (any module) + all non-Indirect modules
