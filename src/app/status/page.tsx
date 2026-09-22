@@ -172,18 +172,19 @@ export default async function DailyStatus() {
     return acc;
   }, {});
 
-  // Modules whose REGULAR Team Members count as Indirect labor
-  const indirectModuleKeywords = ['cutting', 'batch', 'training'];
-  // Leadership/supervisory roles are always Direct regardless of module
-  const directRoles = ['Team Leader', 'Group Leader', 'Mender', 'Technical', 'Office'];
+  // Roles that are always Indirect (supervisory/support staff)
+  const indirectRoles = ['Team Leader', 'Group Leader', 'Mender'];
+  // Modules that are Indirect (support departments)
+  const indirectModuleKeywords = ['technical', 'office'];
 
-  function isIndirect(moduleName: string | null | undefined, role: string | null | undefined): boolean {
-    if (!moduleName) return false;
-    // If the person has a leadership/supervisory role → always Direct
-    if (role && directRoles.some(dr => role.toLowerCase().includes(dr.toLowerCase()))) return false;
-    // Otherwise classify by module
+  function isIndirect(moduleName: string, role: string | null | undefined): boolean {
+    // Indirect by ROLE: Team Leaders, Group Leaders, Menders
+    if (role && indirectRoles.some(ir => role.toLowerCase().includes(ir.toLowerCase()))) return true;
+    // Indirect by MODULE: Technical, Office departments
     const lower = moduleName.toLowerCase();
-    return indirectModuleKeywords.some(kw => lower.includes(kw));
+    if (indirectModuleKeywords.some(kw => lower.includes(kw))) return true;
+    // Everyone else (regular Team Members in Cutting, Batch, Training, Sewing lines) = Direct
+    return false;
   }
 
   if (attendance) {
@@ -194,8 +195,7 @@ export default async function DailyStatus() {
       // Use the pre-built lookup map — guaranteed to work without any join
       const moduleName: string = moduleNameById[record.module_id] || '';
 
-      // Indirect: regular Team Members in Cutting, Batch Preparation, Training Line modules
-      // Direct: Team Leaders, Group Leaders, Menders (any module) + all non-Indirect modules
+      // Apply correct factory classification
       const isIndirectEmployee = isIndirect(moduleName, role);
 
       // Exclude Maternity from total absence count
