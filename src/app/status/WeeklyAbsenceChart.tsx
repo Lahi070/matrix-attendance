@@ -30,7 +30,7 @@ export default function WeeklyAbsenceChart({ data }: { data: { week: string, per
           <LineChart data={displayData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
             <XAxis dataKey="week" stroke="#94a3b8" tick={{ fill: '#94a3b8' }} />
-            <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8' }} domain={[0, 'dataMax + 2']} unit="%" />
+            <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8' }} domain={[0, (dataMax: number) => Math.max(Math.ceil(dataMax) + 1, 6)]} unit="%" />
             <Tooltip 
               contentStyle={{ backgroundColor: '#1e293b', borderColor: '#475569', color: '#f1f5f9' }}
               itemStyle={{ color: '#38bdf8' }}

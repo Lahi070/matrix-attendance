@@ -10,6 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Cell,
+  ReferenceLine,
 } from 'recharts';
 import { Check, ChevronDown } from 'lucide-react';
 
@@ -119,12 +120,13 @@ export default function DailyAbsenceChart({ data }: { data: DailyData[] }) {
           <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
             <XAxis dataKey="day" stroke="#94a3b8" tick={{ fill: '#94a3b8' }} />
-            <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8' }} domain={[0, 'dataMax + 2']} unit="%" />
+            <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8' }} domain={[0, (dataMax: number) => Math.max(Math.ceil(dataMax) + 1, 6)]} unit="%" />
             <Tooltip
               contentStyle={{ backgroundColor: '#1e293b', borderColor: '#475569', color: '#f1f5f9' }}
               itemStyle={{ color: '#10b981' }}
               formatter={(value: any) => [`${value}%`, 'Absence']}
             />
+            <ReferenceLine y={5.6} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'top', value: 'Target 5.6%', fill: '#ef4444', fontSize: 12 }} />
             <Bar dataKey="percentage" name="Absence" radius={[6, 6, 0, 0]} maxBarSize={60}>
               {chartData.map((entry, index) => (
                 <Cell
