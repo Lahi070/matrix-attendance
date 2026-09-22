@@ -123,7 +123,7 @@ export default function DailyAbsenceChart({ data }: { data: DailyData[] }) {
             <Tooltip
               contentStyle={{ backgroundColor: '#1e293b', borderColor: '#475569', color: '#f1f5f9' }}
               itemStyle={{ color: '#10b981' }}
-              formatter={(value: number) => [`${value}%`, 'Absence']}
+              formatter={(value: any) => [`${value}%`, 'Absence']}
             />
             <Bar dataKey="percentage" name="Absence" radius={[6, 6, 0, 0]} maxBarSize={60}>
               {chartData.map((entry, index) => (
