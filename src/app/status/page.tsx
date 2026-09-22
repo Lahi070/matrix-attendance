@@ -3,8 +3,8 @@ import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle2, XCircle, Activity, Users } from 'lucide-react';
 import AbsenceBreakdownPanel from './AbsenceBreakdownPanel';
-
 import WeeklyAbsenceChart from './WeeklyAbsenceChart';
+import DailyAbsenceChart from './DailyAbsenceChart';
 
 export const revalidate = 0;
 
@@ -37,12 +37,11 @@ export default async function DailyStatus() {
     .select('module_id, status, category, reason_id, team_members(gender, role)')
     .eq('date', today);
 
-  // Fetch historical attendance for the last 12 weeks
+  // Fetch historical attendance for the last 12 weeks (and all data for daily stats)
   const { data: historicalAttendance } = await supabase
     .from('attendance')
     .select('date, status')
-    .gte('date', twelveWeeksAgoStr)
-    .lte('date', today);
+    .limit(100000);
 
   // Get Team Leaders for each module
   const { data: teamLeaders } = await supabase
@@ -81,9 +80,37 @@ export default async function DailyStatus() {
   // Process historical data for chart
   const weeklyDataMap = new Map<string, { total: number, absent: number }>();
   
+  // Pre-fill the last 12 weeks to ensure graph has data points even if no attendance was marked
+  for (let i = 11; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i * 7);
+    const dateObj = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    const dayNum = dateObj.getUTCDay() || 7;
+    dateObj.setUTCDate(dateObj.getUTCDate() + 4 - dayNum);
+    const yearStart = new Date(Date.UTC(dateObj.getUTCFullYear(),0,1));
+    const weekNo = Math.ceil((((dateObj.getTime() - yearStart.getTime()) / 86400000) + 1)/7);
+    weeklyDataMap.set(`W${weekNo}`, { total: 0, absent: 0 });
+  }
+
+  // Process data for daily chart (Monday to Friday)
+  const dailyData: { month: string, day: string, total: number, absent: number }[] = [];
+  const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  const monthsOfYear = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+  
   if (historicalAttendance) {
     historicalAttendance.forEach(record => {
       const dateObj = new Date(record.date);
+      const dayName = daysOfWeek[dateObj.getDay()];
+      const monthName = monthsOfYear[dateObj.getMonth()];
+      
+      if (dayName !== 'Sunday' && dayName !== 'Saturday') {
+        dailyData.push({
+          month: monthName,
+          day: dayName,
+          total: 1,
+          absent: record.status === 'Absent' ? 1 : 0
+        });
+      }
       // ISO Week calculation
       const d = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
       const dayNum = d.getUTCDay() || 7;
@@ -245,6 +272,7 @@ export default async function DailyStatus() {
         </div>
 
         <WeeklyAbsenceChart data={weeklyChartData} />
+        <DailyAbsenceChart data={dailyData} />
 
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
