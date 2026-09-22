@@ -10,6 +10,7 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { Check, ChevronDown } from 'lucide-react';
 
 type DailyData = {
   month: string;
@@ -26,7 +27,6 @@ export default function DailyAbsenceChart({ data }: { data: DailyData[] }) {
   const allMonths = useMemo(() => {
     const months = new Set<string>();
     data.forEach(d => months.add(d.month));
-    // Sort chronologically if possible, or just keep insertion order (assuming data is sorted)
     return Array.from(months);
   }, [data]);
 
@@ -39,12 +39,10 @@ export default function DailyAbsenceChart({ data }: { data: DailyData[] }) {
   };
 
   const chartData = useMemo(() => {
-    // Filter by selected months, or use all if none selected
     const activeData = selectedMonths.length > 0 
       ? data.filter(d => selectedMonths.includes(d.month))
       : data;
 
-    // Aggregate by day of week (Monday to Friday)
     const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
     const agg = new Map(days.map(d => [d, { total: 0, absent: 0 }]));
 
@@ -81,31 +79,34 @@ export default function DailyAbsenceChart({ data }: { data: DailyData[] }) {
             {selectedMonths.length === 0 
               ? 'Overall (All Months)' 
               : `${selectedMonths.length} Month${selectedMonths.length > 1 ? 's' : ''} Selected`}
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+            <ChevronDown className="w-4 h-4" />
           </button>
 
           {isDropdownOpen && (
             <div className="absolute right-0 mt-2 w-48 bg-slate-800 border border-slate-700 rounded-xl shadow-xl z-50 p-2 flex flex-col gap-1">
-              <label className="flex items-center gap-2 px-3 py-2 hover:bg-slate-700/50 rounded-lg cursor-pointer text-sm text-slate-300">
-                <input 
-                  type="checkbox" 
-                  checked={selectedMonths.length === 0}
-                  onChange={() => setSelectedMonths([])}
-                  className="rounded border-slate-600 bg-slate-900 text-blue-500 focus:ring-blue-500/20"
-                />
+              <div 
+                onClick={() => setSelectedMonths([])}
+                className="flex items-center gap-3 px-3 py-2 hover:bg-slate-700/50 rounded-lg cursor-pointer text-sm text-slate-300 transition-colors"
+              >
+                <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedMonths.length === 0 ? 'bg-blue-500 border-blue-500' : 'border-slate-500 bg-slate-900/50'}`}>
+                  {selectedMonths.length === 0 && <Check className="w-3 h-3 text-white" />}
+                </div>
                 Overall
-              </label>
+              </div>
+              
               <div className="h-px bg-slate-700 my-1"></div>
+              
               {allMonths.map(month => (
-                <label key={month} className="flex items-center gap-2 px-3 py-2 hover:bg-slate-700/50 rounded-lg cursor-pointer text-sm text-slate-300">
-                  <input 
-                    type="checkbox" 
-                    checked={selectedMonths.includes(month)}
-                    onChange={() => toggleMonth(month)}
-                    className="rounded border-slate-600 bg-slate-900 text-blue-500 focus:ring-blue-500/20"
-                  />
+                <div 
+                  key={month}
+                  onClick={() => toggleMonth(month)}
+                  className="flex items-center gap-3 px-3 py-2 hover:bg-slate-700/50 rounded-lg cursor-pointer text-sm text-slate-300 transition-colors"
+                >
+                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${selectedMonths.includes(month) ? 'bg-blue-500 border-blue-500' : 'border-slate-500 bg-slate-900/50'}`}>
+                    {selectedMonths.includes(month) && <Check className="w-3 h-3 text-white" />}
+                  </div>
                   {month}
-                </label>
+                </div>
               ))}
             </div>
           )}
