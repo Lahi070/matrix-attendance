@@ -34,7 +34,7 @@ export default async function DailyStatus() {
   // Fetch detailed attendance for today (for dashboard summary)
   const { data: attendance } = await supabase
     .from('attendance')
-    .select('module_id, status, category, reason_id, team_members(gender, role)')
+    .select('module_id, status, category, reason_id, team_members(gender, role), modules(name)')
     .eq('date', today);
 
   // Fetch historical attendance for the last 12 weeks (and all data for daily stats)
@@ -168,18 +168,33 @@ export default async function DailyStatus() {
     return acc;
   }, {});
 
+  // Modules whose Team Members count as Indirect labor
+  const indirectModuleKeywords = ['cutting', 'batch', 'training'];
+
+  function isIndirectByModule(moduleName: string | null | undefined): boolean {
+    if (!moduleName) return false;
+    const lower = moduleName.toLowerCase();
+    return indirectModuleKeywords.some(kw => lower.includes(kw));
+  }
+
   if (attendance) {
     attendance.filter(a => a.status === 'Absent').forEach(record => {
       const teamMember = record.team_members as any;
+      const moduleInfo = record.modules as any;
       const gender = teamMember?.gender;
       const role = teamMember?.role;
-      
+      const moduleName: string | undefined = moduleInfo?.name;
+
+      // Indirect: Team Members in Cutting, Batch Preparation, Training Line modules
+      // Direct: Team Leaders, Group Leaders, Menders, Technical, Office etc.
+      const isIndirect = isIndirectByModule(moduleName);
+
       // Exclude Maternity from total absence count
       if (record.category !== 'Maternity') {
         if (gender === 'Male') maleAbsent++;
         if (gender === 'Female') femaleAbsent++;
-        
-        if (role === 'Indirect') {
+
+        if (isIndirect) {
           indirectAbsent++;
         } else if (!role || !excludedRoles.includes(role)) {
           directAbsent++;
@@ -188,8 +203,8 @@ export default async function DailyStatus() {
 
       if (record.category && record.category !== 'Maternity') {
         categoryCounts[record.category] = (categoryCounts[record.category] || 0) + 1;
-        
-        if (role === 'Indirect') {
+
+        if (isIndirect) {
           indirectCounts[record.category] = (indirectCounts[record.category] || 0) + 1;
         } else if (!role || !excludedRoles.includes(role)) {
           directCounts[record.category] = (directCounts[record.category] || 0) + 1;
