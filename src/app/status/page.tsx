@@ -168,11 +168,16 @@ export default async function DailyStatus() {
     return acc;
   }, {});
 
-  // Modules whose Team Members count as Indirect labor
+  // Modules whose REGULAR Team Members count as Indirect labor
   const indirectModuleKeywords = ['cutting', 'batch', 'training'];
+  // Leadership/supervisory roles are always Direct regardless of module
+  const directRoles = ['Team Leader', 'Group Leader', 'Mender', 'Technical', 'Office'];
 
-  function isIndirectByModule(moduleName: string | null | undefined): boolean {
+  function isIndirect(moduleName: string | null | undefined, role: string | null | undefined): boolean {
     if (!moduleName) return false;
+    // If the person has a leadership/supervisory role → always Direct
+    if (role && directRoles.some(dr => role.toLowerCase().includes(dr.toLowerCase()))) return false;
+    // Otherwise classify by module
     const lower = moduleName.toLowerCase();
     return indirectModuleKeywords.some(kw => lower.includes(kw));
   }
@@ -185,16 +190,16 @@ export default async function DailyStatus() {
       const role = teamMember?.role;
       const moduleName: string | undefined = moduleInfo?.name;
 
-      // Indirect: Team Members in Cutting, Batch Preparation, Training Line modules
-      // Direct: Team Leaders, Group Leaders, Menders, Technical, Office etc.
-      const isIndirect = isIndirectByModule(moduleName);
+      // Indirect: regular Team Members in Cutting, Batch Preparation, Training Line modules
+      // Direct: Team Leaders, Group Leaders, Menders (any module) + all non-Indirect modules
+      const isIndirectEmployee = isIndirect(moduleName, role);
 
       // Exclude Maternity from total absence count
       if (record.category !== 'Maternity') {
         if (gender === 'Male') maleAbsent++;
         if (gender === 'Female') femaleAbsent++;
 
-        if (isIndirect) {
+        if (isIndirectEmployee) {
           indirectAbsent++;
         } else if (!role || !excludedRoles.includes(role)) {
           directAbsent++;
@@ -204,7 +209,7 @@ export default async function DailyStatus() {
       if (record.category && record.category !== 'Maternity') {
         categoryCounts[record.category] = (categoryCounts[record.category] || 0) + 1;
 
-        if (isIndirect) {
+        if (isIndirectEmployee) {
           indirectCounts[record.category] = (indirectCounts[record.category] || 0) + 1;
         } else if (!role || !excludedRoles.includes(role)) {
           directCounts[record.category] = (directCounts[record.category] || 0) + 1;
