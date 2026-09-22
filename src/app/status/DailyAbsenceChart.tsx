@@ -65,7 +65,7 @@ export default function DailyAbsenceChart({ data }: { data: DailyData[] }) {
 
   return (
     <div className="bg-[#111827]/40 backdrop-blur-xl p-6 rounded-2xl shadow-lg border border-slate-600/30 relative overflow-hidden group flex flex-col mb-8">
-      <div className="flex justify-between items-start sm:items-center mb-6 relative z-10 flex-col sm:flex-row gap-4">
+      <div className="flex justify-between items-start sm:items-center mb-6 relative z-30 flex-col sm:flex-row gap-4">
         <h2 className="text-lg font-bold text-slate-200">
           Daily Absence Percentage (Mon - Fri)
         </h2>
