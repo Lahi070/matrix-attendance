@@ -2,13 +2,14 @@
 
 import { useState, useMemo } from 'react';
 import {
-  LineChart,
-  Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  Cell,
 } from 'recharts';
 import { Check, ChevronDown } from 'lucide-react';
 
@@ -115,16 +116,25 @@ export default function DailyAbsenceChart({ data }: { data: DailyData[] }) {
 
       <div className="h-64 w-full relative z-10">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <BarChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
             <XAxis dataKey="day" stroke="#94a3b8" tick={{ fill: '#94a3b8' }} />
             <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8' }} domain={[0, 'dataMax + 2']} unit="%" />
-            <Tooltip 
+            <Tooltip
               contentStyle={{ backgroundColor: '#1e293b', borderColor: '#475569', color: '#f1f5f9' }}
               itemStyle={{ color: '#10b981' }}
+              formatter={(value: number) => [`${value}%`, 'Absence']}
             />
-            <Line type="monotone" dataKey="percentage" name="Absence" stroke="#10b981" strokeWidth={3} dot={{ r: 4, fill: '#10b981' }} activeDot={{ r: 6 }} />
-          </LineChart>
+            <Bar dataKey="percentage" name="Absence" radius={[6, 6, 0, 0]} maxBarSize={60}>
+              {chartData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={entry.percentage > 5.6 ? '#ef4444' : '#10b981'}
+                  fillOpacity={0.85}
+                />
+              ))}
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
       </div>
     </div>
