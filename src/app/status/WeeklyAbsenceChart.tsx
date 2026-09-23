@@ -26,7 +26,7 @@ export default function WeeklyAbsenceChart({ data, currentWeek }: { data: { week
 
       <div className="h-64 w-full relative z-10">
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={displayData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+          <LineChart data={displayData} margin={{ top: 25, right: 30, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
             <XAxis 
               dataKey="week" 
@@ -54,10 +54,10 @@ export default function WeeklyAbsenceChart({ data, currentWeek }: { data: { week
                 stroke="#4ade80" 
                 strokeDasharray="3 3" 
                 strokeOpacity={0.6} 
-                label={{ position: 'top', value: 'Current', fill: '#4ade80', fontSize: 12, fontWeight: 'bold' }} 
+                label={{ position: 'insideTopLeft', value: 'Current', fill: '#4ade80', fontSize: 12, fontWeight: 'bold' }} 
               />
             )}
-            <ReferenceLine y={5.6} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'top', value: 'Target 5.6%', fill: '#ef4444', fontSize: 12 }} />
+            <ReferenceLine y={5.6} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'insideTopLeft', value: 'Target 5.6%', fill: '#ef4444', fontSize: 12 }} />
             <Line 
               type="monotone" 
               dataKey="percentage" 
