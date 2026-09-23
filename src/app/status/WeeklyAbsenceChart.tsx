@@ -12,7 +12,7 @@ import {
   ReferenceLine
 } from 'recharts';
 
-export default function WeeklyAbsenceChart({ data }: { data: { week: string, percentage: number }[] }) {
+export default function WeeklyAbsenceChart({ data, currentWeek }: { data: { week: string, percentage: number }[], currentWeek?: string }) {
   const [weeksToShow, setWeeksToShow] = useState<number>(4);
   
   const displayData = data.slice(-weeksToShow);
@@ -35,6 +35,9 @@ export default function WeeklyAbsenceChart({ data }: { data: { week: string, per
               contentStyle={{ backgroundColor: '#1e293b', borderColor: '#475569', color: '#f1f5f9' }}
               itemStyle={{ color: '#38bdf8' }}
             />
+            {currentWeek && (
+              <ReferenceLine x={currentWeek} stroke="#fbbf24" strokeOpacity={0.5} strokeWidth={20} />
+            )}
             <ReferenceLine y={5.6} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'top', value: 'Target 5.6%', fill: '#ef4444', fontSize: 12 }} />
             <Line type="monotone" dataKey="percentage" name="Absence" stroke="#38bdf8" strokeWidth={3} dot={{ r: 4, fill: '#38bdf8' }} activeDot={{ r: 6 }} />
           </LineChart>

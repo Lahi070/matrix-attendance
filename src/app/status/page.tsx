@@ -97,6 +97,15 @@ export default async function DailyStatus() {
   // Process historical data for chart
   const weeklyDataMap = new Map<string, { total: number, absent: number }>();
   
+  // Calculate current week label
+  const now = new Date();
+  const dNow = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const dayNumNow = dNow.getUTCDay() || 7;
+  dNow.setUTCDate(dNow.getUTCDate() + 4 - dayNumNow);
+  const yearStartNow = new Date(Date.UTC(dNow.getUTCFullYear(),0,1));
+  const currentWeekNo = Math.ceil((((dNow.getTime() - yearStartNow.getTime()) / 86400000) + 1)/7);
+  const currentWeekLabel = `W${currentWeekNo}`;
+
   // Pre-fill the last 12 weeks to ensure graph has data points even if no attendance was marked
   for (let i = 11; i >= 0; i--) {
     const d = new Date();
@@ -319,7 +328,7 @@ export default async function DailyStatus() {
           />
         </div>
 
-        <WeeklyAbsenceChart data={weeklyChartData} />
+        <WeeklyAbsenceChart data={weeklyChartData} currentWeek={currentWeekLabel} />
         <DailyAbsenceChart data={dailyData} />
 
         {/* Summary Cards */}
