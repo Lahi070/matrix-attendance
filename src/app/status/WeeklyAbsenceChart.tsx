@@ -14,7 +14,6 @@ import {
 
 export default function WeeklyAbsenceChart({ data, currentWeek }: { data: { week: string, percentage: number }[], currentWeek?: string }) {
   const [weeksToShow, setWeeksToShow] = useState<number>(4);
-  
   const displayData = data.slice(-weeksToShow);
 
   return (
@@ -29,17 +28,51 @@ export default function WeeklyAbsenceChart({ data, currentWeek }: { data: { week
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={displayData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
-            <XAxis dataKey="week" stroke="#94a3b8" tick={{ fill: '#94a3b8' }} />
+            <XAxis 
+              dataKey="week" 
+              stroke="#94a3b8" 
+              tick={(props: any) => {
+                const { x, y, payload } = props;
+                const isCurrent = payload?.value === currentWeek;
+                return (
+                  <g transform={`translate(${x},${y})`}>
+                    <text x={0} y={0} dy={16} textAnchor="middle" fill={isCurrent ? '#4ade80' : '#94a3b8'} fontWeight={isCurrent ? 'bold' : 'normal'}>
+                      {payload?.value}
+                    </text>
+                  </g>
+                );
+              }} 
+            />
             <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8' }} domain={[0, (dataMax: number) => Math.max(Math.ceil(dataMax) + 1, 6)]} unit="%" />
             <Tooltip 
               contentStyle={{ backgroundColor: '#1e293b', borderColor: '#475569', color: '#f1f5f9' }}
               itemStyle={{ color: '#38bdf8' }}
             />
             {currentWeek && (
-              <ReferenceLine x={currentWeek} stroke="#fbbf24" strokeOpacity={0.5} strokeWidth={20} />
+              <ReferenceLine 
+                x={currentWeek} 
+                stroke="#4ade80" 
+                strokeDasharray="3 3" 
+                strokeOpacity={0.6} 
+                label={{ position: 'top', value: 'Current', fill: '#4ade80', fontSize: 12, fontWeight: 'bold' }} 
+              />
             )}
             <ReferenceLine y={5.6} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'top', value: 'Target 5.6%', fill: '#ef4444', fontSize: 12 }} />
-            <Line type="monotone" dataKey="percentage" name="Absence" stroke="#38bdf8" strokeWidth={3} dot={{ r: 4, fill: '#38bdf8' }} activeDot={{ r: 6 }} />
+            <Line 
+              type="monotone" 
+              dataKey="percentage" 
+              name="Absence" 
+              stroke="#38bdf8" 
+              strokeWidth={3} 
+              dot={(props: any) => {
+                const { cx, cy, payload } = props;
+                const isCurrent = payload?.week === currentWeek;
+                return (
+                  <circle cx={cx} cy={cy} r={isCurrent ? 6 : 4} fill={isCurrent ? '#4ade80' : '#38bdf8'} stroke={isCurrent ? '#4ade80' : '#38bdf8'} strokeWidth={2} />
+                );
+              }} 
+              activeDot={{ r: 8 }} 
+            />
           </LineChart>
         </ResponsiveContainer>
       </div>
