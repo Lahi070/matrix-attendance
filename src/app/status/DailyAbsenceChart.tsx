@@ -117,7 +117,7 @@ export default function DailyAbsenceChart({ data }: { data: DailyData[] }) {
 
       <div className="h-64 w-full relative z-10">
         <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={chartData} margin={{ top: 25, right: 30, left: 0, bottom: 0 }}>
+          <BarChart data={chartData} margin={{ top: 25, right: 60, left: 0, bottom: 0 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#334155" vertical={false} />
             <XAxis dataKey="day" stroke="#94a3b8" tick={{ fill: '#94a3b8' }} />
             <YAxis stroke="#94a3b8" tick={{ fill: '#94a3b8' }} domain={[0, (dataMax: number) => Math.max(Math.ceil(dataMax) + 1, 6)]} unit="%" />
@@ -126,7 +126,7 @@ export default function DailyAbsenceChart({ data }: { data: DailyData[] }) {
               itemStyle={{ color: '#10b981' }}
               formatter={(value: any) => [`${value}%`, 'Absence']}
             />
-            <ReferenceLine y={5.6} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'insideTopLeft', value: 'Target 5.6%', fill: '#ef4444', fontSize: 12 }} />
+            <ReferenceLine y={5.6} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'top', value: 'Target 5.6%', fill: '#ef4444', fontSize: 12 }} />
             <Bar dataKey="percentage" name="Absence" radius={[6, 6, 0, 0]} maxBarSize={60}>
               {chartData.map((entry, index) => (
                 <Cell
