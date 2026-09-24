@@ -356,27 +356,33 @@ export default async function DailyStatus() {
 
         {/* Highest Absence Module Card */}
         {highestAbsenceModule.count > 0 && (
-          <div className="bg-[#111827]/40 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-orange-500/30 relative overflow-hidden mb-6">
-            <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="flex items-center gap-4 relative z-10">
-              <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
+          <div className="bg-[#111827]/40 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-orange-500/40 relative overflow-hidden mb-6">
+            <div className="absolute -right-6 -top-6 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="absolute -left-6 -bottom-6 w-24 h-24 bg-red-500/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="flex items-center gap-5 relative z-10">
+              {/* Warning Icon */}
+              <div className="bg-orange-500/15 border border-orange-500/30 p-4 rounded-2xl shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
               </div>
+              {/* Module Info */}
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest mb-0.5">⚠ Highest Absence Today</p>
-                <p className="text-xl font-black text-white truncate">{highestAbsenceModule.name}</p>
-                <p className="text-slate-400 text-xs mt-0.5">
-                  <span className="text-orange-300 font-bold">{highestAbsenceModule.count} absent</span>
+                <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest mb-1">⚠ Highest Absence Module Today</p>
+                <p className="text-2xl font-black text-white leading-tight">{highestAbsenceModule.name}</p>
+                <div className="flex items-center gap-3 mt-1 flex-wrap">
+                  <span className="text-orange-300 font-bold text-sm">{highestAbsenceModule.count} staff absent</span>
                   {highestAbsenceModule.percentage > 0 && (
-                    <span className="ml-2 text-slate-500">({highestAbsenceModule.percentage.toFixed(1)}% of module cadre)</span>
+                    <span className="text-xs bg-orange-500/10 border border-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full font-medium">
+                      {highestAbsenceModule.percentage.toFixed(1)}% of cadre
+                    </span>
                   )}
-                </p>
+                </div>
               </div>
-              <div className="text-right shrink-0">
-                <div className="text-4xl font-black text-orange-400">{highestAbsenceModule.count}</div>
-                <div className="text-[10px] text-orange-500 font-bold uppercase tracking-wider">Absent</div>
+              {/* Big Number */}
+              <div className="text-right shrink-0 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-6 py-3">
+                <div className="text-5xl font-black text-orange-400 leading-none">{highestAbsenceModule.count}</div>
+                <div className="text-[10px] text-orange-500 font-bold uppercase tracking-wider mt-1">Absent</div>
               </div>
             </div>
           </div>
@@ -426,12 +432,16 @@ export default async function DailyStatus() {
             const isMarked = markedModules.has(mod.id);
             const leaderName = leaderMap[mod.id] || mod.responsible_leader || 'No Leader';
             const cadreCount = cadreCountByModule[mod.id] || 0;
+            const absentCount = absentCountByModule[mod.id] || 0;
+            const isHighest = mod.name === highestAbsenceModule.name && highestAbsenceModule.count > 0;
             
             return (
               <div key={mod.id} className={`p-4 rounded-xl border backdrop-blur-md relative overflow-hidden transition-all hover:scale-105 ${
-                isMarked 
-                  ? 'bg-emerald-900/20 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]' 
-                  : 'bg-pink-900/10 border-pink-500/30 shadow-[0_0_10px_rgba(236,72,153,0.1)]'
+                isHighest
+                  ? 'bg-orange-900/20 border-orange-500/50 shadow-[0_0_14px_rgba(249,115,22,0.25)]'
+                  : isMarked 
+                    ? 'bg-emerald-900/20 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]' 
+                    : 'bg-pink-900/10 border-pink-500/30 shadow-[0_0_10px_rgba(236,72,153,0.1)]'
               }`}>
                 <div className="relative z-10">
                   <div className="font-bold text-base text-white mb-1 truncate" title={mod.name}>{mod.name}</div>
@@ -440,9 +450,14 @@ export default async function DailyStatus() {
                   </div>
                   <div className="text-[11px] text-slate-300 flex items-center justify-between mb-1">
                     <span>Cadre: <span className="font-medium text-white">{cadreCount}</span></span>
+                    {absentCount > 0 && (
+                      <span className={`font-bold text-[11px] px-1.5 py-0.5 rounded-full ${isHighest ? 'bg-orange-500/20 text-orange-300' : 'bg-red-500/20 text-red-300'}`}>
+                        -{absentCount}
+                      </span>
+                    )}
                   </div>
-                  <div className="text-[11px] font-bold">
-                    <span className={`${isMarked ? 'text-emerald-400' : 'text-pink-400'}`}>{isMarked ? 'Completed' : 'Pending'}</span>
+                  <div className="text-[11px] font-bold flex items-center gap-1">
+                    <span className={`${isMarked ? 'text-emerald-400' : 'text-pink-400'}`}>{isMarked ? '✓ Completed' : '○ Pending'}</span>
                   </div>
                 </div>
                 
