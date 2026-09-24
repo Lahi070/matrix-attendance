@@ -127,10 +127,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             const Icon = item.icon;
             const isActive = pathname === item.path;
             return (
-              <Link key={item.name} href={item.path} 
+              <Link key={item.name} href={item.path} title={item.name}
                 className={`flex items-center gap-4 px-2 lg:px-4 py-3.5 rounded-xl transition-all font-medium text-sm justify-center lg:justify-start
                 ${isActive ? 'bg-gradient-to-r from-blue-900/40 to-transparent text-white border border-blue-800/50 shadow-inner' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}>
-                <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-500'}`} title={item.name} />
+                <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-500'}`} />
                 <span className="hidden lg:block whitespace-nowrap">{item.name}</span>
               </Link>
             )
