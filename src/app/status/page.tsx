@@ -6,6 +6,7 @@ import AbsenceBreakdownPanel from './AbsenceBreakdownPanel';
 import WeeklyAbsenceChart from './WeeklyAbsenceChart';
 import DailyAbsenceChart from './DailyAbsenceChart';
 import HistoricalModal from './HistoricalModal';
+import Footer from '@/components/Footer';
 
 export const revalidate = 0;
 
@@ -490,6 +491,7 @@ export default async function DailyStatus() {
           })}
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

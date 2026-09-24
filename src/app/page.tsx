@@ -2,6 +2,7 @@
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { ChevronRight, Activity, Settings } from 'lucide-react';
+import Footer from '@/components/Footer';
 
 export const revalidate = 0; // Disable caching
 
@@ -189,6 +190,7 @@ export default async function Home() {
            </Link>
         </div>
       </div>
+      <Footer />
     </div>
   );
 }

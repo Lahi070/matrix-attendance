@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Users, Grid, Settings, FileSpreadsheet, LogOut, Command, UserPlus, Lock, Eye, EyeOff } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import Footer from '@/components/Footer';
 
 const ADMIN_PASSWORD = 'admin123#';
 const SESSION_KEY = 'admin_auth';
@@ -154,14 +155,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto p-8 relative">
+      <div className="flex-1 overflow-auto relative flex flex-col">
         {/* Ambient Background Glows */}
         <div className="fixed top-[-10%] left-[20%] w-[50vw] h-[50vw] bg-blue-900/10 rounded-full blur-[120px] pointer-events-none"></div>
         <div className="fixed bottom-[-10%] right-[-5%] w-[40vw] h-[40vw] bg-purple-900/10 rounded-full blur-[120px] pointer-events-none"></div>
         
-        <div className="max-w-6xl mx-auto relative z-10 pb-10">
+        <div className="max-w-6xl w-full mx-auto p-4 sm:p-8 relative z-10 flex-1">
           {children}
         </div>
+        <Footer />
       </div>
     </div>
   );
