@@ -265,15 +265,16 @@ export default async function DailyStatus() {
   }
 
   // Count absences per module for today (exclude Maternity & non-Team Members like TL/GL)
-  const teamMemberOnlyRoles = ['Team Leader', 'Group Leader', 'Mender', 'DGM', 'AM', 'Executive', 'Senior Executive'];
+  const rolesToExclude = ['Team Leader', 'Group Leader', 'Mender', 'DGM', 'AM', 'Executive', 'Senior Executive'];
   const absentCountByModule: Record<string, number> = {};
   if (attendance) {
     attendance
       .filter(a => {
-        const role = (a.team_members as any)?.role || '';
+        const tm = Array.isArray(a.team_members) ? a.team_members[0] : a.team_members;
+        const role = (tm as any)?.role;
         return a.status === 'Absent' 
           && a.category !== 'Maternity'
-          && !teamMemberOnlyRoles.some(r => role.toLowerCase().includes(r.toLowerCase()));
+          && (!role || !rolesToExclude.includes(role));
       })
       .forEach(record => {
         const mid = record.module_id;
@@ -379,7 +380,7 @@ export default async function DailyStatus() {
                 <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest mb-1">⚠ Highest Absence Module Today</p>
                 <p className="text-2xl font-black text-white leading-tight">{highestAbsenceModule.name}</p>
                 <div className="flex items-center gap-3 mt-1 flex-wrap">
-                  <span className="text-orange-300 font-bold text-sm">{highestAbsenceModule.count} staff absent</span>
+                  <span className="text-orange-300 font-bold text-sm">{highestAbsenceModule.count} Team Members absent</span>
                   {highestAbsenceModule.percentage > 0 && (
                     <span className="text-xs bg-orange-500/10 border border-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full font-medium">
                       {highestAbsenceModule.percentage.toFixed(1)}% of cadre
