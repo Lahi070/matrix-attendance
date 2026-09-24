@@ -67,14 +67,13 @@ export default async function DailyStatus() {
     .select('*', { count: 'exact', head: true })
     .not('role', 'in', '("DGM","AM","Executive","Senior Executive")');
 
-  // Fetch manual percentage from settings (stored in manual_cadre; values ≤ 200 are treated as % override)
+  // Fetch manual cadre from settings (if set, use it to calculate absence percentage)
   const { data: settings } = await supabase
     .from('system_settings')
     .select('manual_cadre')
     .eq('id', 1)
     .single();
-  // manual_cadre stores percentage×10 as integer (e.g. 2.2% → 22). Values > 1000 = old cadre data, ignored.
-  const manualPercentage = (settings?.manual_cadre && settings.manual_cadre <= 1000) ? settings.manual_cadre / 10 : 0;
+  const manualCadre = settings?.manual_cadre || 0;
 
   // Group by module for marking status
   const markedModules = new Set(attendance?.map(a => a.module_id));
@@ -345,8 +344,8 @@ export default async function DailyStatus() {
                {/* Absence Percentage Section */}
                <div className="flex-1 flex flex-col justify-center items-center bg-pink-900/20 border border-pink-500/30 rounded-xl py-3">
                   <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-red-500 mb-1">
-                    {manualPercentage > 0
-                      ? manualPercentage.toFixed(1)
+                    {manualCadre > 0
+                      ? (((maleAbsent + femaleAbsent) / manualCadre) * 100).toFixed(1)
                       : (dbTotal && dbTotal > 0 
                           ? (((maleAbsent + femaleAbsent) / dbTotal) * 100).toFixed(1) 
                           : '0.0')}%
