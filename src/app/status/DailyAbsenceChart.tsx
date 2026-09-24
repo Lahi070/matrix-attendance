@@ -11,6 +11,7 @@ import {
   ResponsiveContainer,
   Cell,
   ReferenceLine,
+  Label,
 } from 'recharts';
 import { Check, ChevronDown } from 'lucide-react';
 
@@ -126,7 +127,16 @@ export default function DailyAbsenceChart({ data }: { data: DailyData[] }) {
               itemStyle={{ color: '#10b981' }}
               formatter={(value: any) => [`${value}%`, 'Absence']}
             />
-            <ReferenceLine y={5.6} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'top', value: 'Target 5.6%', fill: '#ef4444', fontSize: 12 }} />
+            <ReferenceLine y={5.6} stroke="#f97316" strokeDasharray="4 3" strokeWidth={1.5}>
+              <Label
+                value="Target 5.6%"
+                position="insideTopRight"
+                fill="#f97316"
+                fontSize={11}
+                fontWeight="bold"
+                dy={-6}
+              />
+            </ReferenceLine>
             <Bar dataKey="percentage" name="Absence" radius={[6, 6, 0, 0]} maxBarSize={60}>
               {chartData.map((entry, index) => (
                 <Cell

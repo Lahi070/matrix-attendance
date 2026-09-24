@@ -9,7 +9,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  ReferenceLine
+  ReferenceLine,
+  Label,
 } from 'recharts';
 
 export default function WeeklyAbsenceChart({ data, currentWeek }: { data: { week: string, percentage: number }[], currentWeek?: string }) {
@@ -57,7 +58,16 @@ export default function WeeklyAbsenceChart({ data, currentWeek }: { data: { week
                 label={{ position: 'top', value: 'Current', fill: '#4ade80', fontSize: 12, fontWeight: 'bold' }} 
               />
             )}
-            <ReferenceLine y={5.6} stroke="#ef4444" strokeDasharray="3 3" label={{ position: 'top', value: 'Target 5.6%', fill: '#ef4444', fontSize: 12 }} />
+            <ReferenceLine y={5.6} stroke="#f97316" strokeDasharray="4 3" strokeWidth={1.5}>
+              <Label
+                value="Target 5.6%"
+                position="insideTopRight"
+                fill="#f97316"
+                fontSize={11}
+                fontWeight="bold"
+                dy={-6}
+              />
+            </ReferenceLine>
             <Line 
               type="monotone" 
               dataKey="percentage" 
