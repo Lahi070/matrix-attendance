@@ -264,13 +264,21 @@ export default async function DailyStatus() {
     }
   }
 
-  // Count absences per module for today (exclude Maternity)
+  // Count absences per module for today (exclude Maternity & non-Team Members like TL/GL)
+  const teamMemberOnlyRoles = ['Team Leader', 'Group Leader', 'Mender', 'DGM', 'AM', 'Executive', 'Senior Executive'];
   const absentCountByModule: Record<string, number> = {};
   if (attendance) {
-    attendance.filter(a => a.status === 'Absent' && a.category !== 'Maternity').forEach(record => {
-      const mid = record.module_id;
-      if (mid) absentCountByModule[mid] = (absentCountByModule[mid] || 0) + 1;
-    });
+    attendance
+      .filter(a => {
+        const role = (a.team_members as any)?.role || '';
+        return a.status === 'Absent' 
+          && a.category !== 'Maternity'
+          && !teamMemberOnlyRoles.some(r => role.toLowerCase().includes(r.toLowerCase()));
+      })
+      .forEach(record => {
+        const mid = record.module_id;
+        if (mid) absentCountByModule[mid] = (absentCountByModule[mid] || 0) + 1;
+      });
   }
 
   // Find module with highest absence
