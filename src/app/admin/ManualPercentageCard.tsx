@@ -15,12 +15,11 @@ export default function ManualPercentageCard({ dbTotal, totalAbsent }: { dbTotal
 
   useEffect(() => {
     const fetchSettings = async () => {
-      // We store the manual percentage override in the existing manual_cadre column
-      // Values > 200 are treated as cadre count (old logic), values <= 200 as direct percentage
+      // manual_cadre column is INTEGER. We store percentage * 10 to support decimals.
+      // e.g. 2.2% is stored as 22, 5.6% as 56. Values > 1000 are ignored (old cadre data).
       const { data } = await supabase.from('system_settings').select('manual_cadre').eq('id', 1).single();
-      if (data && data.manual_cadre && data.manual_cadre <= 200) {
-        // This is a percentage value stored in manual_cadre
-        setManualPercentage(data.manual_cadre);
+      if (data && data.manual_cadre && data.manual_cadre <= 1000) {
+        setManualPercentage(data.manual_cadre / 10);
       }
       setLoading(false);
     };
@@ -34,8 +33,9 @@ export default function ManualPercentageCard({ dbTotal, totalAbsent }: { dbTotal
       return;
     }
     
-    // Store percentage in manual_cadre column (values ≤ 200 = percentage override)
-    const { error } = await supabase.from('system_settings').update({ manual_cadre: num }).eq('id', 1);
+    // Multiply by 10 and round to store as integer (e.g. 2.2 → 22)
+    const storeVal = Math.round(num * 10);
+    const { error } = await supabase.from('system_settings').update({ manual_cadre: storeVal }).eq('id', 1);
     
     if (error) {
       alert("Failed to save: " + error.message);

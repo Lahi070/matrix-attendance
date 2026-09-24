@@ -73,7 +73,8 @@ export default async function DailyStatus() {
     .select('manual_cadre')
     .eq('id', 1)
     .single();
-  const manualPercentage = (settings?.manual_cadre && settings.manual_cadre <= 200) ? settings.manual_cadre : 0;
+  // manual_cadre stores percentage×10 as integer (e.g. 2.2% → 22). Values > 1000 = old cadre data, ignored.
+  const manualPercentage = (settings?.manual_cadre && settings.manual_cadre <= 1000) ? settings.manual_cadre / 10 : 0;
 
   // Group by module for marking status
   const markedModules = new Set(attendance?.map(a => a.module_id));
