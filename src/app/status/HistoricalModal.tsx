@@ -153,16 +153,16 @@ export default function HistoricalModal({ dbTotal, manualCadre, moduleNameById }
                       </div>
                     </div>
                     <div className="flex flex-grow gap-4">
-                       <div className="flex-1 flex flex-col justify-center items-center bg-red-900/20 border border-red-500/30 rounded-xl py-3">
-                          <div className="text-5xl font-black text-red-400 mb-1">{data.totalAbsent}</div>
-                          <div className="text-red-500 font-bold text-[10px] uppercase tracking-widest mt-1">Total Absent</div>
+                       <div className="flex-1 flex flex-col justify-center items-center bg-red-900/20 border border-red-500/30 rounded-xl py-3 px-2">
+                          <div className="text-4xl sm:text-5xl font-black text-red-400 mb-1 text-center">{data.totalAbsent}</div>
+                          <div className="text-red-500 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest mt-1 text-center">Total Absent</div>
                        </div>
                        
-                       <div className="flex-1 flex flex-col justify-center items-center bg-pink-900/20 border border-pink-500/30 rounded-xl py-3">
-                          <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-red-500 mb-1">
+                       <div className="flex-1 flex flex-col justify-center items-center bg-pink-900/20 border border-pink-500/30 rounded-xl py-3 px-2">
+                          <div className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-red-500 mb-1 text-center">
                             {activeCadre > 0 ? ((data.totalAbsent / activeCadre) * 100).toFixed(1) : '0.0'}%
                           </div>
-                          <div className="text-pink-500 font-bold text-[10px] uppercase tracking-widest mt-1">Absence %</div>
+                          <div className="text-pink-500 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest mt-1 text-center">Absence %</div>
                        </div>
                     </div>
                   </div>

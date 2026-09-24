@@ -109,45 +109,46 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   return (
     <div className="flex h-screen bg-[#070b14] font-sans text-slate-300 overflow-hidden">
       {/* Sidebar */}
-      <div className="w-64 bg-[#0a101d] border-r border-slate-800/60 flex flex-col relative z-20">
-        <div className="p-6 pb-2">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="bg-gradient-to-br from-cyan-400 to-blue-600 p-2 rounded-xl shadow-lg shadow-cyan-500/20">
+      <div className="w-16 lg:w-64 shrink-0 bg-[#0a101d] border-r border-slate-800/60 flex flex-col relative z-20 transition-all duration-300">
+        <div className="p-4 lg:p-6 pb-2">
+          <div className="flex items-center gap-3 mb-2 justify-center lg:justify-start">
+            <div className="bg-gradient-to-br from-cyan-400 to-blue-600 p-2 rounded-xl shadow-lg shadow-cyan-500/20 shrink-0">
               <Command className="w-6 h-6 text-white" />
             </div>
-            <div>
+            <div className="hidden lg:block">
               <h2 className="text-xl font-bold tracking-tight text-white">MAS Matrix</h2>
               <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase mt-0.5">Matrix System</p>
             </div>
           </div>
         </div>
         
-        <nav className="flex-1 px-4 mt-8 space-y-2">
+        <nav className="flex-1 px-2 lg:px-4 mt-8 space-y-2">
           {nav.map(item => {
             const Icon = item.icon;
             const isActive = pathname === item.path;
             return (
               <Link key={item.name} href={item.path} 
-                className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all font-medium text-sm
+                className={`flex items-center gap-4 px-2 lg:px-4 py-3.5 rounded-xl transition-all font-medium text-sm justify-center lg:justify-start
                 ${isActive ? 'bg-gradient-to-r from-blue-900/40 to-transparent text-white border border-blue-800/50 shadow-inner' : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'}`}>
-                <Icon className={`w-5 h-5 ${isActive ? 'text-cyan-400' : 'text-slate-500'}`} />
-                {item.name}
+                <Icon className={`w-5 h-5 shrink-0 ${isActive ? 'text-cyan-400' : 'text-slate-500'}`} title={item.name} />
+                <span className="hidden lg:block whitespace-nowrap">{item.name}</span>
               </Link>
             )
           })}
         </nav>
         
-        <div className="p-4 border-t border-slate-800/60 mt-auto space-y-1">
+        <div className="p-2 lg:p-4 border-t border-slate-800/60 mt-auto space-y-1">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-4 px-4 py-3.5 text-slate-400 hover:bg-red-900/30 hover:text-red-300 rounded-xl transition-all font-medium text-sm w-full"
+            className="flex items-center gap-4 px-2 lg:px-4 py-3.5 text-slate-400 hover:bg-red-900/30 hover:text-red-300 rounded-xl transition-all font-medium text-sm w-full justify-center lg:justify-start"
+            title="Lock Admin"
           >
-            <Lock className="w-5 h-5" />
-            Lock Admin
+            <Lock className="w-5 h-5 shrink-0" />
+            <span className="hidden lg:block whitespace-nowrap">Lock Admin</span>
           </button>
-          <Link href="/" className="flex items-center gap-4 px-4 py-3.5 text-slate-400 hover:bg-slate-800/50 hover:text-white rounded-xl transition-all font-medium text-sm">
-            <LogOut className="w-5 h-5" />
-            Exit Admin
+          <Link href="/" className="flex items-center gap-4 px-2 lg:px-4 py-3.5 text-slate-400 hover:bg-slate-800/50 hover:text-white rounded-xl transition-all font-medium text-sm justify-center lg:justify-start" title="Exit Admin">
+            <LogOut className="w-5 h-5 shrink-0" />
+            <span className="hidden lg:block whitespace-nowrap">Exit Admin</span>
           </Link>
         </div>
       </div>
