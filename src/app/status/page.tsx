@@ -175,7 +175,7 @@ export default async function DailyStatus() {
   const categoryCounts: Record<string, number> = {
     'Planning leave': 0,
     'Inform leave': 0,
-    'Not inform': 0,
+    'Not inform leave': 0,
     'Dutypay': 0,
     'Half day': 0
   };
@@ -234,12 +234,14 @@ export default async function DailyStatus() {
       }
 
       if (record.category && record.category !== 'Maternity') {
-        categoryCounts[record.category] = (categoryCounts[record.category] || 0) + 1;
+        const cat = record.category === 'Not inform' ? 'Not inform leave' : record.category;
+        
+        categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
 
         if (isIndirectEmployee) {
-          indirectCounts[record.category] = (indirectCounts[record.category] || 0) + 1;
+          indirectCounts[cat] = (indirectCounts[cat] || 0) + 1;
         } else if (!role || !excludedRoles.includes(role)) {
-          directCounts[record.category] = (directCounts[record.category] || 0) + 1;
+          directCounts[cat] = (directCounts[cat] || 0) + 1;
         }
       }
     });

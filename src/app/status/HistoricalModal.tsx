@@ -56,9 +56,16 @@ export default function HistoricalModal({ dbTotal, manualCadre, moduleNameById }
       }
 
       let tAbsent = 0;
-      const catCounts: Record<string, number> = {};
-      const dirCounts: Record<string, number> = {};
-      const indCounts: Record<string, number> = {};
+      const defaultCategories = {
+        'Planning leave': 0,
+        'Inform leave': 0,
+        'Not inform leave': 0,
+        'Dutypay': 0,
+        'Half day': 0
+      };
+      const catCounts: Record<string, number> = { ...defaultCategories };
+      const dirCounts: Record<string, number> = { ...defaultCategories };
+      const indCounts: Record<string, number> = { ...defaultCategories };
 
       attendance.filter(a => a.status === 'Absent').forEach(record => {
         const tm = Array.isArray(record.team_members) ? record.team_members[0] : record.team_members;
@@ -70,11 +77,12 @@ export default function HistoricalModal({ dbTotal, manualCadre, moduleNameById }
           tAbsent++;
           
           if (record.category) {
-            catCounts[record.category] = (catCounts[record.category] || 0) + 1;
+            const cat = record.category === 'Not inform' ? 'Not inform leave' : record.category;
+            catCounts[cat] = (catCounts[cat] || 0) + 1;
             if (isIndirectEmployee) {
-              indCounts[record.category] = (indCounts[record.category] || 0) + 1;
+              indCounts[cat] = (indCounts[cat] || 0) + 1;
             } else if (!role || !excludedRoles.includes(role)) {
-              dirCounts[record.category] = (dirCounts[record.category] || 0) + 1;
+              dirCounts[cat] = (dirCounts[cat] || 0) + 1;
             }
           }
         }
