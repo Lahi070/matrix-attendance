@@ -67,13 +67,13 @@ export default async function DailyStatus() {
     .select('*', { count: 'exact', head: true })
     .not('role', 'in', '("DGM","AM","Executive","Senior Executive")');
 
-  // Fetch manual cadre from settings
+  // Fetch manual percentage from settings
   const { data: settings } = await supabase
     .from('system_settings')
-    .select('manual_cadre')
+    .select('manual_percentage')
     .eq('id', 1)
     .single();
-  const manualCadre = settings?.manual_cadre || 0;
+  const manualPercentage = settings?.manual_percentage || 0;
 
   // Group by module for marking status
   const markedModules = new Set(attendance?.map(a => a.module_id));
@@ -309,12 +309,14 @@ export default async function DailyStatus() {
                   <div className="text-red-500 font-bold text-[10px] uppercase tracking-widest mt-1">Total Absent</div>
                </div>
                
-               {/* Absence Percentage Section (using manual cadre logic from Admin) */}
+               {/* Absence Percentage Section */}
                <div className="flex-1 flex flex-col justify-center items-center bg-pink-900/20 border border-pink-500/30 rounded-xl py-3">
                   <div className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-red-500 mb-1">
-                    {manualCadre > 0 || (dbTotal && dbTotal > 0) 
-                      ? (((maleAbsent + femaleAbsent) / (manualCadre > 0 ? manualCadre : (dbTotal || 0))) * 100).toFixed(1) 
-                      : '0.0'}%
+                    {manualPercentage > 0
+                      ? manualPercentage.toFixed(1)
+                      : (dbTotal && dbTotal > 0 
+                          ? (((maleAbsent + femaleAbsent) / dbTotal) * 100).toFixed(1) 
+                          : '0.0')}%
                   </div>
                   <div className="text-pink-500 font-bold text-[10px] uppercase tracking-widest mt-1">Absence %</div>
                </div>
