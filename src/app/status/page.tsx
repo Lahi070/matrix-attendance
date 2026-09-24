@@ -5,6 +5,7 @@ import { ArrowLeft, CheckCircle2, XCircle, Activity, Users } from 'lucide-react'
 import AbsenceBreakdownPanel from './AbsenceBreakdownPanel';
 import WeeklyAbsenceChart from './WeeklyAbsenceChart';
 import DailyAbsenceChart from './DailyAbsenceChart';
+import HistoricalModal from './HistoricalModal';
 
 export const revalidate = 0;
 
@@ -319,6 +320,11 @@ export default async function DailyStatus() {
             </p>
           </div>
           <div className="flex gap-3">
+            <HistoricalModal 
+              dbTotal={dbTotal || 0} 
+              manualCadre={manualCadre} 
+              moduleNameById={moduleNameById} 
+            />
             <Link href="/" className="bg-[#111827]/80 backdrop-blur-xl border border-slate-700/50 hover:border-slate-500 text-slate-300 px-5 py-2.5 rounded-xl transition-all text-sm font-semibold flex items-center gap-2 shadow-lg">
               <ArrowLeft className="w-4 h-4" />
               Home
