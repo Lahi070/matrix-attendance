@@ -264,6 +264,29 @@ export default async function DailyStatus() {
     }
   }
 
+  // Count absences per module for today (exclude Maternity)
+  const absentCountByModule: Record<string, number> = {};
+  if (attendance) {
+    attendance.filter(a => a.status === 'Absent' && a.category !== 'Maternity').forEach(record => {
+      const mid = record.module_id;
+      if (mid) absentCountByModule[mid] = (absentCountByModule[mid] || 0) + 1;
+    });
+  }
+
+  // Find module with highest absence
+  let highestAbsenceModule = { name: 'N/A', count: 0, percentage: 0 };
+  Object.entries(absentCountByModule).forEach(([moduleId, count]) => {
+    const cadre = cadreCountByModule[moduleId] || 0;
+    const pct = cadre > 0 ? (count / cadre) * 100 : 0;
+    if (count > highestAbsenceModule.count) {
+      highestAbsenceModule = {
+        name: moduleNameById[moduleId] || 'Unknown',
+        count,
+        percentage: pct,
+      };
+    }
+  });
+
   return (
     <div 
       className="min-h-screen flex flex-col items-center py-12 px-4 sm:px-8 font-sans text-slate-200 relative overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed"
@@ -330,6 +353,34 @@ export default async function DailyStatus() {
             indirectCounts={indirectCounts} 
           />
         </div>
+
+        {/* Highest Absence Module Card */}
+        {highestAbsenceModule.count > 0 && (
+          <div className="bg-[#111827]/40 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-orange-500/30 relative overflow-hidden mb-6">
+            <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl pointer-events-none" />
+            <div className="flex items-center gap-4 relative z-10">
+              <div className="bg-orange-500/10 border border-orange-500/20 p-3 rounded-xl shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest mb-0.5">⚠ Highest Absence Today</p>
+                <p className="text-xl font-black text-white truncate">{highestAbsenceModule.name}</p>
+                <p className="text-slate-400 text-xs mt-0.5">
+                  <span className="text-orange-300 font-bold">{highestAbsenceModule.count} absent</span>
+                  {highestAbsenceModule.percentage > 0 && (
+                    <span className="ml-2 text-slate-500">({highestAbsenceModule.percentage.toFixed(1)}% of module cadre)</span>
+                  )}
+                </p>
+              </div>
+              <div className="text-right shrink-0">
+                <div className="text-4xl font-black text-orange-400">{highestAbsenceModule.count}</div>
+                <div className="text-[10px] text-orange-500 font-bold uppercase tracking-wider">Absent</div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <WeeklyAbsenceChart data={weeklyChartData} currentWeek={currentWeekLabel} />
         <DailyAbsenceChart data={dailyData} />
