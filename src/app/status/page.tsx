@@ -67,13 +67,13 @@ export default async function DailyStatus() {
     .select('*', { count: 'exact', head: true })
     .not('role', 'in', '("DGM","AM","Executive","Senior Executive")');
 
-  // Fetch manual percentage from settings
+  // Fetch manual percentage from settings (stored in manual_cadre; values ≤ 200 are treated as % override)
   const { data: settings } = await supabase
     .from('system_settings')
-    .select('manual_percentage')
+    .select('manual_cadre')
     .eq('id', 1)
     .single();
-  const manualPercentage = settings?.manual_percentage || 0;
+  const manualPercentage = (settings?.manual_cadre && settings.manual_cadre <= 200) ? settings.manual_cadre : 0;
 
   // Group by module for marking status
   const markedModules = new Set(attendance?.map(a => a.module_id));
