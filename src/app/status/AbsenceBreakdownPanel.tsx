@@ -43,7 +43,9 @@ export default function AbsenceBreakdownPanel({
           let colorClass = "text-slate-300";
           let bgClass = "bg-slate-700";
           
-          if (category === 'Not inform leave' || category === 'Not inform') {
+          const catLower = category.toLowerCase();
+          
+          if (catLower.includes('not inform')) {
             colorClass = "text-red-400";
             bgClass = "bg-red-500/20 text-red-300";
           } else if (category === 'Inform leave' || category === 'Planning leave') {
@@ -60,7 +62,7 @@ export default function AbsenceBreakdownPanel({
           return (
             <div key={category} className="flex justify-between items-center bg-slate-800/50 border border-slate-600/30 p-2.5 rounded-xl hover:bg-slate-700/50 transition-colors">
               <span className={`font-medium text-sm truncate pr-2 ${colorClass}`} title={category}>
-                {category === 'Not inform leave' ? 'Not inform' : category}
+                {category.toLowerCase().includes('not inform') ? 'Not inform' : category}
               </span>
               <span className={`font-bold px-3 py-1 rounded-lg text-sm ${bgClass}`}>{count}</span>
             </div>

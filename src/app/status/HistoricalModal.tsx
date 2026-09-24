@@ -77,7 +77,7 @@ export default function HistoricalModal({ dbTotal, manualCadre, moduleNameById }
           tAbsent++;
           
           if (record.category) {
-            const cat = record.category === 'Not inform' ? 'Not inform leave' : record.category;
+            const cat = record.category.toLowerCase().includes('not inform') ? 'Not inform leave' : record.category;
             catCounts[cat] = (catCounts[cat] || 0) + 1;
             if (isIndirectEmployee) {
               indCounts[cat] = (indCounts[cat] || 0) + 1;

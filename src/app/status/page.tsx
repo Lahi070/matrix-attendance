@@ -234,7 +234,7 @@ export default async function DailyStatus() {
       }
 
       if (record.category && record.category !== 'Maternity') {
-        const cat = record.category === 'Not inform' ? 'Not inform leave' : record.category;
+        const cat = record.category.toLowerCase().includes('not inform') ? 'Not inform leave' : record.category;
         
         categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
 
