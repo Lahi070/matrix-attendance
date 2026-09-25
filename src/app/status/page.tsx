@@ -182,6 +182,7 @@ export default async function DailyStatus() {
   };
   const directCounts: Record<string, number> = { ...categoryCounts };
   const indirectCounts: Record<string, number> = { ...categoryCounts };
+  const informLeaveReasons: Record<string, number> = {};
 
   const cadreCountByModule = (teamMembers || []).reduce((acc: Record<string, number>, member) => {
     if (!excludedRoles.includes(member.role || '')) {
@@ -234,6 +235,10 @@ export default async function DailyStatus() {
         }
       }
 
+      if (record.category === 'Inform leave' && record.reason_id) {
+        informLeaveReasons[record.reason_id] = (informLeaveReasons[record.reason_id] || 0) + 1;
+      }
+
       if (record.category && record.category !== 'Maternity') {
         const cat = record.category.toLowerCase().includes('not inform') ? 'Not inform leave' : record.category;
         
@@ -248,6 +253,11 @@ export default async function DailyStatus() {
     });
   }
 
+  const { data: reasonsData } = await supabase.from('absence_reasons').select('id, reason_text').eq('category', 'Inform leave');
+  const reasonMap: Record<string, string> = {};
+  reasonsData?.forEach(r => {
+    reasonMap[r.id] = r.reason_text;
+  });
 
   if (modules) {
     const cuttingModule = modules.find(m => m.name?.toLowerCase().includes('cutting'));
@@ -371,39 +381,60 @@ export default async function DailyStatus() {
           />
         </div>
 
-        {/* Highest Absence Module Card */}
-        {highestAbsenceModule.count > 0 && (
-          <div className="bg-[#111827]/40 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-orange-500/40 relative overflow-hidden mb-6">
-            <div className="absolute -right-6 -top-6 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="absolute -left-6 -bottom-6 w-24 h-24 bg-red-500/10 rounded-full blur-2xl pointer-events-none" />
-            <div className="flex items-center gap-5 relative z-10">
-              {/* Warning Icon */}
-              <div className="bg-orange-500/15 border border-orange-500/30 p-4 rounded-2xl shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              {/* Module Info */}
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest mb-1">⚠ Highest Absence Module Today</p>
-                <p className="text-2xl font-black text-white leading-tight">{highestAbsenceModule.name}</p>
-                <div className="flex items-center gap-3 mt-1 flex-wrap">
-                  <span className="text-orange-300 font-bold text-sm">{highestAbsenceModule.count} Team Members absent</span>
-                  {highestAbsenceModule.percentage > 0 && (
-                    <span className="text-xs bg-orange-500/10 border border-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full font-medium">
-                      {highestAbsenceModule.percentage.toFixed(1)}% of cadre
-                    </span>
-                  )}
+        {/* Highest Absence & Inform Leaves Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 items-start">
+          {highestAbsenceModule.count > 0 && (
+            <div className="bg-[#111827]/40 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-orange-500/40 relative overflow-hidden">
+              <div className="absolute -right-6 -top-6 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl pointer-events-none" />
+              <div className="absolute -left-6 -bottom-6 w-24 h-24 bg-red-500/10 rounded-full blur-2xl pointer-events-none" />
+              <div className="flex items-center gap-5 relative z-10">
+                {/* Warning Icon */}
+                <div className="bg-orange-500/15 border border-orange-500/30 p-4 rounded-2xl shrink-0">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                {/* Module Info */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest mb-1">⚠ Highest Absence Module Today</p>
+                  <p className="text-2xl font-black text-white leading-tight">{highestAbsenceModule.name}</p>
+                  <div className="flex items-center gap-3 mt-1 flex-wrap">
+                    <span className="text-orange-300 font-bold text-sm">{highestAbsenceModule.count} Team Members absent</span>
+                    {highestAbsenceModule.percentage > 0 && (
+                      <span className="text-xs bg-orange-500/10 border border-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full font-medium">
+                        {highestAbsenceModule.percentage.toFixed(1)}% of cadre
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {/* Big Number */}
+                <div className="text-right shrink-0 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-6 py-3">
+                  <div className="text-5xl font-black text-orange-400 leading-none">{highestAbsenceModule.count}</div>
+                  <div className="text-[10px] text-orange-500 font-bold uppercase tracking-wider mt-1">Absent</div>
                 </div>
               </div>
-              {/* Big Number */}
-              <div className="text-right shrink-0 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-6 py-3">
-                <div className="text-5xl font-black text-orange-400 leading-none">{highestAbsenceModule.count}</div>
-                <div className="text-[10px] text-orange-500 font-bold uppercase tracking-wider mt-1">Absent</div>
-              </div>
             </div>
+          )}
+
+          {/* Inform Leave Reasons */}
+          <div className={`bg-[#111827]/40 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-slate-700/50 ${highestAbsenceModule.count === 0 ? 'lg:col-span-2 max-w-2xl mx-auto w-full' : ''}`}>
+            <h2 className="text-lg font-bold text-slate-200 mb-5 border-b border-slate-800/80 pb-3">Inform Leaves (Today)</h2>
+            {Object.keys(informLeaveReasons).length > 0 ? (
+              <div className="space-y-3">
+                {Object.entries(informLeaveReasons).map(([id, count]) => (
+                  <div key={id} className="flex justify-between items-center p-3 bg-[#1f2937]/30 border border-slate-700/50 rounded-xl hover:border-slate-600 transition-colors">
+                    <span className="text-slate-300 font-medium text-sm">{reasonMap[id] || 'Unknown'}</span>
+                    <span className="font-bold bg-slate-800/80 border border-cyan-500/30 text-cyan-400 px-3 py-1 rounded-full text-xs shadow-[0_0_10px_rgba(6,182,212,0.1)]">{count}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-slate-500 text-center py-8 bg-[#1f2937]/20 rounded-xl border border-dashed border-slate-700/50 font-medium text-sm">
+                No inform leaves recorded today.
+              </div>
+            )}
           </div>
-        )}
+        </div>
 
         <WeeklyAbsenceChart data={weeklyChartData} currentWeek={currentWeekLabel} />
         <DailyAbsenceChart data={dailyData} />
