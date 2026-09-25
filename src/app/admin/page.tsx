@@ -2,6 +2,7 @@
 import { supabase } from '@/lib/supabase';
 import { Users, LayoutGrid, CheckSquare, Activity, UploadCloud, Percent } from 'lucide-react';
 import ManualPercentageCard from './ManualPercentageCard';
+import DownloadCadreButton from './DownloadCadreButton';
 
 export const revalidate = 0;
 
@@ -57,10 +58,13 @@ export default async function AdminDashboard() {
           <h1 className="text-3xl font-bold text-white tracking-tight">Dashboard Summary</h1>
           <p className="text-slate-400 font-medium mt-1">Matrix System Status</p>
         </div>
-        <a href="/admin/upload" className="bg-indigo-600/20 border border-indigo-500/50 hover:bg-indigo-600/40 text-indigo-300 px-5 py-2.5 rounded-lg font-bold shadow-[0_0_15px_rgba(79,70,229,0.3)] flex items-center gap-2 transition-all">
-          <UploadCloud className="w-5 h-5" />
-          Upload Cadre
-        </a>
+        <div className="flex items-center gap-3">
+          <DownloadCadreButton />
+          <a href="/admin/upload" className="bg-indigo-600/20 border border-indigo-500/50 hover:bg-indigo-600/40 text-indigo-300 px-5 py-2.5 rounded-lg font-bold shadow-[0_0_15px_rgba(79,70,229,0.3)] flex items-center gap-2 transition-all">
+            <UploadCloud className="w-5 h-5" />
+            Upload Cadre
+          </a>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
