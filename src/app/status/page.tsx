@@ -1,7 +1,7 @@
 /* eslint-disable */
 import { supabase } from '@/lib/supabase';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle2, XCircle, Activity, Users } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, XCircle, Activity, Users, LayoutGrid, CheckSquare } from 'lucide-react';
 import AbsenceBreakdownPanel from './AbsenceBreakdownPanel';
 import WeeklyAbsenceChart from './WeeklyAbsenceChart';
 import DailyAbsenceChart from './DailyAbsenceChart';
@@ -12,6 +12,7 @@ export const revalidate = 0;
 
 export default async function DailyStatus() {
   const { data: rawModules } = await supabase.from('modules').select('*').eq('is_active', true);
+  const { count: totalModuleCount } = await supabase.from('modules').select('*', { count: 'exact', head: true });
   const modules = rawModules ? [...rawModules].sort((a, b) => {
     const matchA = a.name.match(/^(\d+)/);
     const matchB = b.name.match(/^(\d+)/);
@@ -383,41 +384,80 @@ export default async function DailyStatus() {
 
         {/* Highest Absence & Inform Leaves Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 items-start">
-          {highestAbsenceModule.count > 0 && (
-            <div className="bg-[#111827]/40 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-orange-500/40 relative overflow-hidden">
-              <div className="absolute -right-6 -top-6 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl pointer-events-none" />
-              <div className="absolute -left-6 -bottom-6 w-24 h-24 bg-red-500/10 rounded-full blur-2xl pointer-events-none" />
-              <div className="flex items-center gap-5 relative z-10">
-                {/* Warning Icon */}
-                <div className="bg-orange-500/15 border border-orange-500/30 p-4 rounded-2xl shrink-0">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                </div>
-                {/* Module Info */}
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest mb-1">⚠ Highest Absence Module Today</p>
-                  <p className="text-2xl font-black text-white leading-tight">{highestAbsenceModule.name}</p>
-                  <div className="flex items-center gap-3 mt-1 flex-wrap">
-                    <span className="text-orange-300 font-bold text-sm">{highestAbsenceModule.count} Team Members absent</span>
-                    {highestAbsenceModule.percentage > 0 && (
-                      <span className="text-xs bg-orange-500/10 border border-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full font-medium">
-                        {highestAbsenceModule.percentage.toFixed(1)}% of cadre
-                      </span>
-                    )}
+          
+          {/* Left Column */}
+          <div className="flex flex-col gap-6">
+            {highestAbsenceModule.count > 0 && (
+              <div className="bg-[#111827]/40 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-orange-500/40 relative overflow-hidden">
+                <div className="absolute -right-6 -top-6 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="absolute -left-6 -bottom-6 w-24 h-24 bg-red-500/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex items-center gap-5 relative z-10">
+                  {/* Warning Icon */}
+                  <div className="bg-orange-500/15 border border-orange-500/30 p-4 rounded-2xl shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
+                  {/* Module Info */}
+                  <div className="flex-1 min-w-0">
+                    <p className="text-[10px] text-orange-400 font-bold uppercase tracking-widest mb-1">⚠ Highest Absence Module Today</p>
+                    <p className="text-2xl font-black text-white leading-tight">{highestAbsenceModule.name}</p>
+                    <div className="flex items-center gap-3 mt-1 flex-wrap">
+                      <span className="text-orange-300 font-bold text-sm">{highestAbsenceModule.count} Team Members absent</span>
+                      {highestAbsenceModule.percentage > 0 && (
+                        <span className="text-xs bg-orange-500/10 border border-orange-500/20 text-orange-400 px-2 py-0.5 rounded-full font-medium">
+                          {highestAbsenceModule.percentage.toFixed(1)}% of cadre
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {/* Big Number */}
+                  <div className="text-right shrink-0 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-6 py-3">
+                    <div className="text-5xl font-black text-orange-400 leading-none">{highestAbsenceModule.count}</div>
+                    <div className="text-[10px] text-orange-500 font-bold uppercase tracking-wider mt-1">Absent</div>
                   </div>
                 </div>
-                {/* Big Number */}
-                <div className="text-right shrink-0 bg-orange-500/10 border border-orange-500/20 rounded-2xl px-6 py-3">
-                  <div className="text-5xl font-black text-orange-400 leading-none">{highestAbsenceModule.count}</div>
-                  <div className="text-[10px] text-orange-500 font-bold uppercase tracking-wider mt-1">Absent</div>
+              </div>
+            )}
+
+            {/* Small Summary Cards Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-[#111827]/40 backdrop-blur-xl p-4 sm:p-5 rounded-2xl shadow-lg border border-slate-700/50 relative overflow-hidden group">
+                <div className="absolute -right-4 -top-4 w-20 h-20 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition-all"></div>
+                <div className="flex justify-between items-start relative z-10">
+                  <div>
+                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Module Status</p>
+                    <h3 className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
+                      {modules.length} <span className="text-sm text-slate-500 font-bold">/ {totalModuleCount || 0}</span>
+                    </h3>
+                    <p className="text-purple-400 text-[9px] font-bold mt-1 tracking-wider uppercase">MODULES</p>
+                  </div>
+                  <div className="bg-purple-500/10 border border-purple-500/20 p-2 rounded-xl shadow-inner">
+                    <LayoutGrid className="w-4 h-4 text-purple-400" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-[#111827]/40 backdrop-blur-xl p-4 sm:p-5 rounded-2xl shadow-lg border border-slate-700/50 relative overflow-hidden group">
+                <div className="absolute -right-4 -top-4 w-20 h-20 bg-green-500/10 rounded-full blur-xl group-hover:bg-green-500/20 transition-all"></div>
+                <div className="flex justify-between items-start relative z-10">
+                  <div>
+                    <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Marked Today</p>
+                    <h3 className="text-3xl font-black bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent">
+                      {attendance?.length || 0}
+                    </h3>
+                    <p className="text-green-500 text-[9px] font-bold mt-1 tracking-wider uppercase">MARKED TODAY</p>
+                  </div>
+                  <div className="bg-green-500/10 border border-green-500/20 p-2 rounded-xl shadow-inner">
+                    <CheckSquare className="w-4 h-4 text-green-400" />
+                  </div>
                 </div>
               </div>
             </div>
-          )}
+          </div>
 
           {/* Inform Leave Reasons */}
-          <div className={`bg-[#111827]/40 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-slate-700/50 ${highestAbsenceModule.count === 0 ? 'lg:col-span-2 max-w-2xl mx-auto w-full' : ''}`}>
+          <div className="bg-[#111827]/40 backdrop-blur-xl p-5 rounded-2xl shadow-lg border border-slate-700/50 h-full">
             <h2 className="text-lg font-bold text-slate-200 mb-5 border-b border-slate-800/80 pb-3">Inform Leaves (Today)</h2>
             {Object.keys(informLeaveReasons).length > 0 ? (
               <div className="space-y-3">
