@@ -12,8 +12,11 @@ export const revalidate = 0;
 
 export default async function DailyStatus() {
   const { data: rawModules } = await supabase.from('modules').select('*').eq('is_active', true);
-  const { count: totalModuleCount } = await supabase.from('modules').select('*', { count: 'exact', head: true });
-  const modules = rawModules ? [...rawModules].sort((a, b) => {
+
+  const modules = rawModules ? [...rawModules].filter(mod => {
+    const n = mod.name?.toLowerCase() || '';
+    return !n.includes('laying') && !n.includes('needle');
+  }).sort((a, b) => {
     const matchA = a.name.match(/^(\d+)/);
     const matchB = b.name.match(/^(\d+)/);
     if (matchA && matchB) {
@@ -438,7 +441,7 @@ export default async function DailyStatus() {
                   <div>
                     <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Module Status</p>
                     <h3 className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-                      {modules.length} <span className="text-sm text-slate-500 font-bold">/ {totalModuleCount || 0}</span>
+                      {modules.length} <span className="text-sm text-slate-500 font-bold">/ {modules.length}</span>
                     </h3>
                     <p className="text-purple-400 text-[9px] font-bold mt-1 tracking-wider uppercase">MODULES</p>
                   </div>

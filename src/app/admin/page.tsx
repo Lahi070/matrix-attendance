@@ -10,9 +10,15 @@ export default async function AdminDashboard() {
   const excludedRoles = ['DGM', 'AM', 'Executive', 'Senior Executive'];
   
   const { count: memberCount } = await supabase.from('team_members').select('*', { count: 'exact', head: true }).not('role', 'in', '("DGM","AM","Executive","Senior Executive")');
-  const { count: moduleCount } = await supabase.from('modules').select('*', { count: 'exact', head: true });
-  const { count: activeModuleCount } = await supabase.from('modules').select('*', { count: 'exact', head: true }).eq('is_active', true);
   
+  const { data: rawModules } = await supabase.from('modules').select('name, is_active');
+  const allValidModules = rawModules?.filter(mod => {
+    const n = mod.name?.toLowerCase() || '';
+    return !n.includes('laying') && !n.includes('needle');
+  }) || [];
+  const moduleCount = allValidModules.length;
+  const activeModuleCount = allValidModules.filter(m => m.is_active).length;
+
   const today = new Date().toISOString().split('T')[0];
   const { data: attendanceData } = await supabase.from('attendance').select('status, category, reason_id, team_members(gender, role)').eq('date', today);
   
