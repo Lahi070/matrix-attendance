@@ -11,7 +11,7 @@ import Footer from '@/components/Footer';
 export const revalidate = 0;
 
 export default async function DailyStatus() {
-  const { data: rawModules } = await supabase.from('modules').select('*').eq('is_active', true);
+  const { data: rawModules } = await supabase.from('modules').select('*');
 
   const modules = rawModules ? [...rawModules].filter(mod => {
     const n = mod.name?.toLowerCase() || '';
@@ -67,11 +67,19 @@ export default async function DailyStatus() {
     }
   });
 
-  // Fetch db total cadre (excluding management)
-  const { count: dbTotal } = await supabase
+  const excludedRoles = ['DGM', 'AM', 'Executive', 'Senior Executive'];
+  
+  const { data: teamMembersRaw } = await supabase
     .from('team_members')
-    .select('*', { count: 'exact', head: true })
-    .not('role', 'in', '("DGM","AM","Executive","Senior Executive")');
+    .select('module_id, role');
+    
+  // Filter team members to only those belonging to active (and non-excluded) modules
+  const activeModules = modules.filter(m => m.is_active);
+  const activeModuleIds = new Set(activeModules.map(m => m.id));
+  const teamMembers = (teamMembersRaw || []).filter(member => member.module_id && activeModuleIds.has(member.module_id));
+
+  // Calculate dbTotal cadre (excluding management and inactive modules)
+  const dbTotal = teamMembers.filter(member => !excludedRoles.includes(member.role || '')).length;
 
   // Fetch manual cadre from settings (if set, use it to calculate absence percentage)
   const { data: settings } = await supabase
@@ -82,17 +90,11 @@ export default async function DailyStatus() {
   const manualCadre = settings?.manual_cadre || 0;
 
   // Group by module for marking status
-  const markedModules = new Set(attendance?.map(a => a.module_id));
+  const markedModules = new Set(attendance?.filter(a => activeModuleIds.has(a.module_id)).map(a => a.module_id));
 
-  const total = modules?.length || 0;
+  const total = activeModules.length;
   const marked = markedModules.size;
   const pending = total - marked;
-
-  const { data: teamMembers } = await supabase
-    .from('team_members')
-    .select('module_id, role');
-
-  const excludedRoles = ['DGM', 'AM', 'Executive', 'Senior Executive'];
   
   // Dashboard Summary Data Processing
   let maleAbsent = 0;
@@ -302,6 +304,8 @@ export default async function DailyStatus() {
   // Find module with highest absence
   let highestAbsenceModule = { name: 'N/A', count: 0, percentage: 0 };
   Object.entries(absentCountByModule).forEach(([moduleId, count]) => {
+    if (!activeModuleIds.has(moduleId)) return; // Exclude inactive or excluded modules
+
     const cadre = cadreCountByModule[moduleId] || 0;
     const pct = cadre > 0 ? (count / cadre) * 100 : 0;
     if (count > highestAbsenceModule.count) {
@@ -441,7 +445,7 @@ export default async function DailyStatus() {
                   <div>
                     <p className="text-slate-400 text-[10px] font-bold uppercase tracking-wider mb-1">Module Status</p>
                     <h3 className="text-3xl font-black bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent">
-                      {modules.length} <span className="text-sm text-slate-500 font-bold">/ {modules.length}</span>
+                      {activeModules.length} <span className="text-sm text-slate-500 font-bold">/ {activeModules.length}</span>
                     </h3>
                     <p className="text-purple-400 text-[9px] font-bold mt-1 tracking-wider uppercase">MODULES</p>
                   </div>
@@ -536,16 +540,42 @@ export default async function DailyStatus() {
             const absentCount = absentCountByModule[mod.id] || 0;
             const isHighest = mod.name === highestAbsenceModule.name && highestAbsenceModule.count > 0;
             
+            async function toggleModule(formData: FormData) {
+              'use server';
+              const { createClient } = await import('@supabase/supabase-js');
+              const { revalidatePath } = await import('next/cache');
+              const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+              const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+              const supabaseServer = createClient(supabaseUrl, supabaseKey);
+              
+              const id = formData.get('id') as string;
+              const currentStatus = formData.get('status') === 'true';
+              await supabaseServer.from('modules').update({ is_active: !currentStatus }).eq('id', id);
+              revalidatePath('/status');
+              revalidatePath('/');
+            }
+
+            const cardStyle = !mod.is_active
+              ? 'bg-slate-800/40 border-slate-700/50 opacity-60'
+              : isHighest
+                ? 'bg-orange-900/20 border-orange-500/50 shadow-[0_0_14px_rgba(249,115,22,0.25)]'
+                : isMarked 
+                  ? 'bg-emerald-900/20 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]' 
+                  : 'bg-pink-900/10 border-pink-500/30 shadow-[0_0_10px_rgba(236,72,153,0.1)]';
+
             return (
-              <div key={mod.id} className={`p-4 rounded-xl border backdrop-blur-md relative overflow-hidden transition-all hover:scale-105 ${
-                isHighest
-                  ? 'bg-orange-900/20 border-orange-500/50 shadow-[0_0_14px_rgba(249,115,22,0.25)]'
-                  : isMarked 
-                    ? 'bg-emerald-900/20 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.1)]' 
-                    : 'bg-pink-900/10 border-pink-500/30 shadow-[0_0_10px_rgba(236,72,153,0.1)]'
-              }`}>
+              <div key={mod.id} className={`p-4 rounded-xl border backdrop-blur-md relative overflow-hidden transition-all hover:scale-105 ${cardStyle}`}>
                 <div className="relative z-10">
-                  <div className="font-bold text-base text-white mb-1 truncate" title={mod.name}>{mod.name}</div>
+                  <div className="flex justify-between items-start mb-1">
+                    <div className="font-bold text-base text-white truncate" title={mod.name}>{mod.name}</div>
+                    <form action={toggleModule}>
+                      <input type="hidden" name="id" value={mod.id} />
+                      <input type="hidden" name="status" value={String(mod.is_active)} />
+                      <button type="submit" className={`p-1 rounded-full ${mod.is_active ? 'bg-green-500/20 text-green-400' : 'bg-slate-700/50 text-slate-400'} hover:bg-slate-600 transition-colors`} title={mod.is_active ? 'Turn Off Module' : 'Turn On Module'}>
+                        <Activity className="w-3 h-3" />
+                      </button>
+                    </form>
+                  </div>
                   <div className="text-[11px] text-slate-300 mb-1 flex items-center justify-between">
                     <span>TL: <span className="font-medium text-white truncate max-w-[60px] inline-block align-bottom" title={leaderName}>{leaderName}</span></span>
                   </div>
@@ -558,13 +588,19 @@ export default async function DailyStatus() {
                     )}
                   </div>
                   <div className="text-[11px] font-bold flex items-center gap-1">
-                    <span className={`${isMarked ? 'text-emerald-400' : 'text-pink-400'}`}>{isMarked ? '✓ Completed' : '○ Pending'}</span>
+                    {!mod.is_active ? (
+                      <span className="text-slate-400">Off Shift</span>
+                    ) : (
+                      <span className={`${isMarked ? 'text-emerald-400' : 'text-pink-400'}`}>{isMarked ? '✓ Completed' : '○ Pending'}</span>
+                    )}
                   </div>
                 </div>
                 
                 {/* Big faint icon in background */}
                 <div className="absolute -right-3 -bottom-3 opacity-10 pointer-events-none">
-                  {isMarked ? (
+                  {!mod.is_active ? (
+                    <Activity className="w-16 h-16 text-slate-400" />
+                  ) : isMarked ? (
                     <CheckCircle2 className="w-16 h-16 text-emerald-400" />
                   ) : (
                     <XCircle className="w-16 h-16 text-pink-400" />

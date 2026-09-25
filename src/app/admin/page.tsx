@@ -9,15 +9,18 @@ export const revalidate = 0;
 export default async function AdminDashboard() {
   const excludedRoles = ['DGM', 'AM', 'Executive', 'Senior Executive'];
   
-  const { count: memberCount } = await supabase.from('team_members').select('*', { count: 'exact', head: true }).not('role', 'in', '("DGM","AM","Executive","Senior Executive")');
-  
-  const { data: rawModules } = await supabase.from('modules').select('name, is_active');
+  const { data: rawModules } = await supabase.from('modules').select('id, name, is_active');
   const allValidModules = rawModules?.filter(mod => {
     const n = mod.name?.toLowerCase() || '';
     return !n.includes('laying') && !n.includes('needle');
   }) || [];
   const moduleCount = allValidModules.length;
   const activeModuleCount = allValidModules.filter(m => m.is_active).length;
+  const activeModuleIds = new Set(allValidModules.filter(m => m.is_active).map(m => m.id));
+
+  const { data: teamMembersRaw } = await supabase.from('team_members').select('module_id, role');
+  const activeMembers = (teamMembersRaw || []).filter(member => member.module_id && activeModuleIds.has(member.module_id) && !excludedRoles.includes(member.role || ''));
+  const memberCount = activeMembers.length;
 
   const today = new Date().toISOString().split('T')[0];
   const { data: attendanceData } = await supabase.from('attendance').select('status, category, reason_id, team_members(gender, role)').eq('date', today);
@@ -30,9 +33,8 @@ export default async function AdminDashboard() {
   const roleCounts: Record<string, number> = {};
   const informLeaveReasons: Record<string, number> = {};
 
-  const { data: allMembers } = await supabase.from('team_members').select('role').not('role', 'in', '("DGM","AM","Executive","Senior Executive")');
-  allMembers?.forEach(m => {
-    roleCounts[m.role] = (roleCounts[m.role] || 0) + 1;
+  activeMembers.forEach(m => {
+    if (m.role) roleCounts[m.role] = (roleCounts[m.role] || 0) + 1;
   });
 
   if (attendanceData) {
