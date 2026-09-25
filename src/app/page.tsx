@@ -103,7 +103,18 @@ export default async function Home() {
         </div>
         
         <div className="flex flex-col gap-4 mb-10">
-          <p className="text-sm font-semibold text-slate-400 mb-2 flex items-center gap-2 justify-center">
+          <div className="pb-6 mb-2 border-b border-slate-800/80 flex flex-col sm:flex-row justify-between gap-4">
+             <Link href="/status" className="flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]">
+               <Activity className="w-5 h-5" />
+               Daily Status
+             </Link>
+             <Link href="/admin" className="flex items-center justify-center gap-2 bg-[#1f2937]/80 border border-slate-700 hover:border-slate-500 text-slate-300 px-6 py-3 rounded-xl text-sm font-bold transition-all hover:bg-[#1f2937]">
+               <Settings className="w-5 h-5" />
+               Admin Login
+             </Link>
+          </div>
+
+          <p className="text-sm font-semibold text-slate-400 mb-2 flex items-center gap-2 justify-center pt-2">
             <span className="w-2.5 h-2.5 rounded-full bg-cyan-500 animate-pulse shadow-[0_0_10px_rgba(6,182,212,0.8)]"></span>
             Select Your Module
           </p>
@@ -177,18 +188,7 @@ export default async function Home() {
               </div>
             )}
           </div>
-        </div>
-
-        <div className="pt-8 border-t border-slate-800/80 flex flex-col sm:flex-row justify-between gap-4">
-           <Link href="/status" className="flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]">
-             <Activity className="w-5 h-5" />
-             Daily Status
-           </Link>
-           <Link href="/admin" className="flex items-center justify-center gap-2 bg-[#1f2937]/80 border border-slate-700 hover:border-slate-500 text-slate-300 px-6 py-3 rounded-xl text-sm font-bold transition-all hover:bg-[#1f2937]">
-             <Settings className="w-5 h-5" />
-             Admin Login
-           </Link>
-        </div>
+      </div>
       </div>
       <Footer />
     </div>
