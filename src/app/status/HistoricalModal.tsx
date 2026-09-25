@@ -154,25 +154,36 @@ export default function HistoricalModal({ dbTotal, manualCadre, moduleNameById }
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Total Absentees Summary (Same style as daily status) */}
                   <div className="bg-[#111827]/40 p-5 rounded-2xl shadow-lg border border-slate-600/30 flex flex-col">
-                    <div className="flex justify-between items-center mb-3 border-b border-slate-700 pb-2">
+                    <div className="flex justify-between items-center mb-5 border-b border-slate-700 pb-3">
                       <h2 className="text-lg font-bold text-slate-200">Total Absentees</h2>
-                      <div className="bg-red-500/10 border border-red-500/20 p-2 rounded-lg">
-                        <Activity className="w-5 h-5 text-red-400" />
+                      <div className="bg-slate-800/50 border border-slate-700/50 p-2 rounded-lg">
+                        <Activity className="w-5 h-5 text-slate-400" />
                       </div>
                     </div>
-                    <div className="flex flex-grow gap-4">
-                       <div className="flex-1 flex flex-col justify-center items-center bg-red-900/20 border border-red-500/30 rounded-xl py-3 px-2">
-                          <div className="text-4xl sm:text-5xl font-black text-red-400 mb-1 text-center">{data.totalAbsent}</div>
-                          <div className="text-red-500 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest mt-1 text-center">Total Absent</div>
-                       </div>
-                       
-                       <div className="flex-1 flex flex-col justify-center items-center bg-pink-900/20 border border-pink-500/30 rounded-xl py-3 px-2">
-                          <div className="text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-red-500 mb-1 text-center">
-                            {activeCadre > 0 ? ((data.totalAbsent / activeCadre) * 100).toFixed(1) : '0.0'}%
-                          </div>
-                          <div className="text-pink-500 font-bold text-[9px] sm:text-[10px] uppercase tracking-widest mt-1 text-center">Absence %</div>
-                       </div>
-                    </div>
+                    {(() => {
+                      const absencePercentage = activeCadre > 0 ? (data.totalAbsent / activeCadre) * 100 : 0;
+                      const isHigh = absencePercentage > 5.6;
+                      const colorBg = isHigh ? 'bg-red-900/20' : 'bg-emerald-900/20';
+                      const colorBorder = isHigh ? 'border-red-500/30' : 'border-emerald-500/30';
+                      const colorText = isHigh ? 'text-red-400' : 'text-emerald-400';
+                      const colorLabel = isHigh ? 'text-red-500' : 'text-emerald-500';
+                      
+                      return (
+                        <div className="flex flex-grow gap-4">
+                           <div className={`flex-1 flex flex-col justify-center items-center ${colorBg} border ${colorBorder} rounded-xl py-8 px-2 transition-colors`}>
+                              <div className={`text-6xl sm:text-7xl font-black ${colorText} mb-2 text-center`}>{data.totalAbsent}</div>
+                              <div className={`${colorLabel} font-bold text-[10px] sm:text-xs uppercase tracking-widest mt-1 text-center`}>Total Absent</div>
+                           </div>
+                           
+                           <div className={`flex-1 flex flex-col justify-center items-center ${colorBg} border ${colorBorder} rounded-xl py-8 px-2 transition-colors`}>
+                              <div className={`text-6xl sm:text-7xl font-black ${colorText} mb-2 text-center drop-shadow-sm`}>
+                                {absencePercentage.toFixed(1)}%
+                              </div>
+                              <div className={`${colorLabel} font-bold text-[10px] sm:text-xs uppercase tracking-widest mt-1 text-center`}>Absence %</div>
+                           </div>
+                        </div>
+                      );
+                    })()}
                   </div>
 
                   {/* Absence Breakdown Panel */}
