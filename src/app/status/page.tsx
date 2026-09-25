@@ -556,7 +556,7 @@ export default async function DailyStatus() {
             }
 
             const cardStyle = !mod.is_active
-              ? 'bg-slate-800/40 border-slate-700/50 opacity-60'
+              ? 'bg-slate-800/40 border-slate-700/50 opacity-75'
               : isHighest
                 ? 'bg-orange-900/20 border-orange-500/50 shadow-[0_0_14px_rgba(249,115,22,0.25)]'
                 : isMarked 

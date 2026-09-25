@@ -138,7 +138,7 @@ export default async function Home() {
                     href={isDisabled ? '#' : `/mark/${mod.id}`}
                     className={`group relative overflow-hidden p-5 border rounded-2xl transition-all duration-300 flex flex-col justify-center ${
                       isDisabled 
-                        ? 'bg-slate-900/30 border-slate-800/50 opacity-40 cursor-not-allowed grayscale pointer-events-none'
+                        ? 'bg-slate-800/40 border-slate-700/50 opacity-75 cursor-not-allowed grayscale pointer-events-none'
                         : isComplete
                           ? 'bg-emerald-900/20 border-emerald-500/40 hover:border-emerald-400/60 hover:shadow-[0_0_20px_rgba(16,185,129,0.2)]'
                           : isStarted
@@ -153,7 +153,7 @@ export default async function Home() {
                     <div className="flex justify-between items-center mb-2 relative z-10">
                       <div className="font-bold text-lg text-slate-200 group-hover:text-cyan-400 transition-colors flex items-center gap-2">
                         {mod.name}
-                        {isDisabled && <span className="text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full uppercase tracking-widest font-bold">Off Shift</span>}
+                        {isDisabled && <span className="text-[9px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded-full uppercase tracking-widest font-bold border border-slate-600/50 shadow-inner">Off Shift</span>}
                       </div>
                       <div className="flex items-center gap-2">
                         {/* Complete / Pending badge */}
@@ -168,11 +168,11 @@ export default async function Home() {
                             {isComplete ? '✓ Complete' : isStarted ? '…In Progress' : '○ Pending'}
                           </span>
                         )}
-                        <ChevronRight className={`w-5 h-5 ${isDisabled ? 'text-slate-700' : 'text-slate-600 group-hover:text-cyan-400 group-hover:translate-x-1'} relative z-10 transition-transform`} />
+                        <ChevronRight className={`w-5 h-5 ${isDisabled ? 'text-slate-600' : 'text-slate-600 group-hover:text-cyan-400 group-hover:translate-x-1'} relative z-10 transition-transform`} />
                       </div>
                     </div>
                     
-                    <div className={`flex items-center gap-2 mt-1 relative z-10 flex-wrap ${isDisabled ? 'opacity-50' : ''}`}>
+                    <div className="flex items-center gap-2 mt-1 relative z-10 flex-wrap">
                       {mod.responsible_leader && (
                         <div className="text-xs font-medium text-slate-400 bg-[#0f172a] px-3 py-1 rounded-lg w-fit border border-slate-700/50 shadow-inner">
                           {mod.responsible_leader}
