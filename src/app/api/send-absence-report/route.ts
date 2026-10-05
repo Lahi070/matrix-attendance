@@ -48,7 +48,7 @@ export async function GET(request: Request) {
     // 4. Send Email
     const mailOptions = {
       from: process.env.EMAIL_USER,
-      to: 'LahiruDIss@masholdings.com',
+      to: process.env.EMAIL_TO || 'LahiruDIss@masholdings.com', // Comma-separated list for multiple emails
       subject: `Daily Absence Report - Matrix Attendance (${today})`,
       text: `Good morning,\n\nThe total number of absentees for today (${today}) is: ${absenceCount}.\n\nBest regards,\nMatrix Attendance System`,
       html: `
