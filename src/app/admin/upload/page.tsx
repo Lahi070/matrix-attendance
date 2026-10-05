@@ -64,9 +64,42 @@ export default function UploadCadrePage() {
       const workbook = XLSX.read(dataBuffer, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const sheet = workbook.Sheets[sheetName];
-      const rows = XLSX.utils.sheet_to_json<any>(sheet);
+      const rawRows = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1 });
+      
+      let headerRowIdx = -1;
+      let colIdx = { epf: -1, name: -1, mod: -1, desig: -1, gender: -1 };
 
-      addLog(`Found ${rows.length} rows in the Excel sheet.`);
+      // Find the header row by searching the first 20 rows
+      for (let i = 0; i < Math.min(20, rawRows.length); i++) {
+        const row = rawRows[i];
+        if (!row || !Array.isArray(row)) continue;
+        
+        let tempCols = { epf: -1, name: -1, mod: -1, desig: -1, gender: -1 };
+        
+        row.forEach((cell, idx) => {
+          if (typeof cell !== 'string') return;
+          const val = cell.toLowerCase().replace(/[\s_.]/g, '');
+          if (['epf', 'empno', 'id', 'epfno', 'epfnumber'].includes(val)) tempCols.epf = idx;
+          else if (['name', 'fullname', 'empname', 'employeename', 'nameininitials'].includes(val)) tempCols.name = idx;
+          else if (['newmodule', 'module', 'department', 'line', 'section'].includes(val)) tempCols.mod = idx;
+          else if (['designation', 'role', 'position', 'desig'].includes(val)) tempCols.desig = idx;
+          else if (['gender', 'sex'].includes(val)) tempCols.gender = idx;
+        });
+
+        if (tempCols.epf !== -1 && tempCols.name !== -1 && tempCols.mod !== -1) {
+          headerRowIdx = i;
+          colIdx = tempCols;
+          break;
+        }
+      }
+
+      if (headerRowIdx === -1) {
+        addLog(`Found 0 valid members. Could not find a header row containing 'EPF', 'Name', and 'Module' (or variations like 'New Module').`);
+        setLoading(false);
+        return;
+      }
+
+      addLog(`Detected headers on row ${headerRowIdx + 1}. Processing data...`);
 
       // 1. Get existing modules
       const { data: existingModules } = await supabase.from('modules').select('id, name');
@@ -79,19 +112,17 @@ export default function UploadCadrePage() {
       const validRows = [];
       const excelEpfs = new Set<string>();
 
-      for (const row of rows) {
-        const epf = getColVal(row, 'EPF', 'EmpNo', 'ID', 'epf', 'EPF No');
-        const name = getColVal(row, 'Name', 'FullName', 'EmpName', 'EmployeeName', 'name');
-        const mod = getColVal(row, 'NewModule', 'Module', 'Department', 'New Module', 'Line', 'Section');
-        const desig = getColVal(row, 'Designation', 'Role', 'Position', 'Desig');
-        const gender = getColVal(row, 'Gender', 'Sex');
+      for (let i = headerRowIdx + 1; i < rawRows.length; i++) {
+        const row = rawRows[i];
+        if (!row || !Array.isArray(row) || row.length === 0) continue;
 
-        if (!epf || !name || !mod) {
-          if (validRows.length === 0 && rows.indexOf(row) === 0) {
-             addLog(`[Warning] Row 1 skipped. Found headers: ${Object.keys(row).join(', ')}. Missing EPF, Name, or Module.`);
-          }
-          continue;
-        }
+        const epf = row[colIdx.epf];
+        const name = row[colIdx.name];
+        const mod = row[colIdx.mod];
+        const desig = colIdx.desig !== -1 ? row[colIdx.desig] : null;
+        const gender = colIdx.gender !== -1 ? row[colIdx.gender] : null;
+
+        if (!epf || !name || !mod) continue;
 
         const modNameStr = String(mod).trim();
         const modNameLower = modNameStr.toLowerCase();
@@ -110,11 +141,6 @@ export default function UploadCadrePage() {
         const rawGender = gender !== null && gender !== undefined ? String(gender).trim() : '';
         const rawDesig = desig !== null && desig !== undefined ? String(desig).trim() : '';
         
-        // Log first few for debugging
-        if (validRows.length < 5) {
-          addLog(`[DEBUG] EPF=${cleanEpf} Name=${name} rawGender="${rawGender}" mapped="${mapGender(rawGender)}" rawDesig="${rawDesig}"`);
-        }
-
         validRows.push({
           epf: cleanEpf,
           name: String(name).trim(),
@@ -127,7 +153,7 @@ export default function UploadCadrePage() {
       }
 
       if (validRows.length === 0) {
-        addLog(`Found 0 valid members. Please ensure your Excel sheet has columns named 'EPF', 'Name', and 'Module'.`);
+        addLog(`Found 0 valid members under the detected headers.`);
         setLoading(false);
         return;
       }
