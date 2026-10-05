@@ -186,21 +186,15 @@ export default function UploadCadrePage() {
         }
       });
 
-      // 5. Delete members not in excel
+      // 5. Deactivate members not in excel (instead of deleting to preserve history)
       if (membersToDelete.length > 0) {
-        addLog(`Removing ${membersToDelete.length} members who are no longer in the Excel sheet...`);
-        // Delete in batches of 100
+        addLog(`Removing ${membersToDelete.length} members from active modules (preserving history)...`);
         for (let i = 0; i < membersToDelete.length; i += 100) {
           const batch = membersToDelete.slice(i, i + 100);
-          const batchIds = existingMembers?.filter(m => batch.includes(m.epf)).map(m => m.id) || [];
-          if (batchIds.length > 0) {
-            const { error: attErr } = await supabase.from('attendance').delete().in('member_id', batchIds);
-            if (attErr) throw new Error(`Delete attendance error: ${attErr.message}`);
-          }
-          const { error: delErr } = await supabase.from('team_members').delete().in('epf', batch);
-          if (delErr) throw new Error(`Delete members error: ${delErr.message}`);
+          const { error: updErr } = await supabase.from('team_members').update({ module_id: null }).in('epf', batch);
+          if (updErr) throw new Error(`Deactivate members error: ${updErr.message}`);
         }
-        addLog(`Successfully removed old members.`);
+        addLog(`Successfully removed old members from active modules.`);
       }
 
       // 6. Upsert rows
@@ -235,20 +229,18 @@ export default function UploadCadrePage() {
         }
       }
 
-      // 7. Cleanup Empty Modules
+      // 7. Cleanup Empty Modules (Deactivate instead of delete to preserve history)
       addLog(`Cleaning up any empty modules...`);
       const { data: allMods } = await supabase.from('modules').select('id, name');
       const { data: allMembers } = await supabase.from('team_members').select('module_id');
       if (allMods && allMembers) {
-        const activeModuleIds = new Set(allMembers.map(m => m.module_id));
+        const activeModuleIds = new Set(allMembers.filter(m => m.module_id).map(m => m.module_id));
         const emptyMods = allMods.filter(m => !activeModuleIds.has(m.id));
         if (emptyMods.length > 0) {
           const emptyIds = emptyMods.map(m => m.id);
-          const { error: errA } = await supabase.from('attendance').delete().in('module_id', emptyIds);
-          if (errA) throw new Error(`Cleanup att error: ${errA.message}`);
-          const { error: errM } = await supabase.from('modules').delete().in('id', emptyIds);
-          if (errM) throw new Error(`Cleanup mod error: ${errM.message}`);
-          addLog(`Removed ${emptyMods.length} empty modules.`);
+          const { error: errM } = await supabase.from('modules').update({ is_active: false }).in('id', emptyIds);
+          if (errM) throw new Error(`Deactivate empty module error: ${errM.message}`);
+          addLog(`Deactivated ${emptyMods.length} empty modules.`);
         }
       }
 
