@@ -80,13 +80,18 @@ export default function UploadCadrePage() {
       const excelEpfs = new Set<string>();
 
       for (const row of rows) {
-        const epf = getColVal(row, 'EPF', 'EmpNo', 'ID');
-        const name = getColVal(row, 'Name', 'FullName', 'EmpName', 'EmployeeName');
-        const mod = getColVal(row, 'NewModule', 'Module', 'Department', 'New Module');
-        const desig = getColVal(row, 'Designation', 'Role', 'Position');
+        const epf = getColVal(row, 'EPF', 'EmpNo', 'ID', 'epf', 'EPF No');
+        const name = getColVal(row, 'Name', 'FullName', 'EmpName', 'EmployeeName', 'name');
+        const mod = getColVal(row, 'NewModule', 'Module', 'Department', 'New Module', 'Line', 'Section');
+        const desig = getColVal(row, 'Designation', 'Role', 'Position', 'Desig');
         const gender = getColVal(row, 'Gender', 'Sex');
 
-        if (!epf || !name || !mod) continue;
+        if (!epf || !name || !mod) {
+          if (validRows.length === 0 && rows.indexOf(row) === 0) {
+             addLog(`[Warning] Row 1 skipped. Found headers: ${Object.keys(row).join(', ')}. Missing EPF, Name, or Module.`);
+          }
+          continue;
+        }
 
         const modNameStr = String(mod).trim();
         const modNameLower = modNameStr.toLowerCase();
@@ -119,6 +124,12 @@ export default function UploadCadrePage() {
           desig: rawDesig
         });
         excelEpfs.add(cleanEpf);
+      }
+
+      if (validRows.length === 0) {
+        addLog(`Found 0 valid members. Please ensure your Excel sheet has columns named 'EPF', 'Name', and 'Module'.`);
+        setLoading(false);
+        return;
       }
 
       addLog(`Found ${validRows.length} valid members after ignoring unneeded modules.`);
