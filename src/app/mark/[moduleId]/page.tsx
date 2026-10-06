@@ -44,6 +44,14 @@ export default async function MarkAttendancePage({ params }: { params: { moduleI
     .from('absence_reasons')
     .select('*');
 
+  // Fetch today's existing attendance
+  const today = new Date().toISOString().split('T')[0];
+  const { data: existingAttendance } = await supabase
+    .from('attendance')
+    .select('member_id, status, category, reason_id')
+    .eq('module_id', moduleId)
+    .eq('date', today);
+
   return (
     <div 
       className="min-h-screen flex flex-col items-center py-12 px-4 sm:px-8 font-sans text-slate-200 relative overflow-hidden bg-cover bg-center bg-no-repeat bg-fixed"
@@ -58,6 +66,7 @@ export default async function MarkAttendancePage({ params }: { params: { moduleI
           moduleName={moduleData.name}
           members={members || []}
           reasons={reasons || []}
+          existingData={existingAttendance || []}
         />
       </div>
     </div>

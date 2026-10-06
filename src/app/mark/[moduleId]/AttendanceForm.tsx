@@ -14,14 +14,31 @@ interface Props {
   moduleName: string;
   members: Member[];
   reasons: Reason[];
+  existingData?: { member_id: string; status: string; category: string | null; reason_id: string | null }[];
 }
 
-export default function AttendanceForm({ moduleId, moduleName, members, reasons }: Props) {
+export default function AttendanceForm({ moduleId, moduleName, members, reasons, existingData = [] }: Props) {
   const router = useRouter();
   const [attendance, setAttendance] = useState<Record<string, { status: string; category?: string; reason_id?: string }>>(() => {
     const initialState: Record<string, { status: string; category?: string; reason_id?: string }> = {};
+    
+    // Create a map of existing data for fast lookup
+    const existingMap = new Map();
+    existingData.forEach(d => {
+      existingMap.set(d.member_id, d);
+    });
+
     members.forEach(member => {
-      initialState[member.id] = { status: 'Present', category: '', reason_id: '' };
+      const saved = existingMap.get(member.id);
+      if (saved) {
+        initialState[member.id] = { 
+          status: saved.status, 
+          category: saved.category || '', 
+          reason_id: saved.reason_id || '' 
+        };
+      } else {
+        initialState[member.id] = { status: 'Present', category: '', reason_id: '' };
+      }
     });
     return initialState;
   });
