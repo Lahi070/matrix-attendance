@@ -292,7 +292,6 @@ export default async function DailyStatus() {
         const tm = Array.isArray(a.team_members) ? a.team_members[0] : a.team_members;
         const role = (tm as any)?.role;
         return a.status === 'Absent' 
-          && a.category !== 'Maternity'
           && (!role || !rolesToExclude.includes(role));
       })
       .forEach(record => {
