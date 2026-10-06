@@ -29,11 +29,12 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons 
   const [errorIds, setErrorIds] = useState<Set<string>>(new Set());
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const categories = ['Planning leave', 'Inform leave', 'Maternity', 'Not inform leave', 'Dutypay', 'Half day'];
+  const categories = ['Planning leave', 'Inform leave', 'Maternity', 'Not inform leave', 'Dutypay', 'Half day', 'Shift'];
 
   const getFilteredReasons = (category: string) => {
-    if (category === 'Maternity') {
-      return reasons.filter(r => r.reason_text.toLowerCase().includes('maternity'));
+    // No specific reasons needed for Maternity or Shift - just the category is enough.
+    if (category === 'Maternity' || category === 'Shift') {
+      return [];
     }
 
     if (category === 'Inform leave') {

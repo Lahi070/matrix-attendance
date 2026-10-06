@@ -229,8 +229,8 @@ export default async function DailyStatus() {
       // Apply correct factory classification
       const isIndirectEmployee = isIndirect(moduleName, role);
 
-      // Exclude Maternity from total absence count
-      if (record.category !== 'Maternity') {
+      // Exclude Maternity and Shift from total absence count
+      if (record.category !== 'Maternity' && record.category !== 'Shift') {
         if (gender === 'Male') maleAbsent++;
         if (gender === 'Female') femaleAbsent++;
 
@@ -245,7 +245,7 @@ export default async function DailyStatus() {
         informLeaveReasons[record.reason_id] = (informLeaveReasons[record.reason_id] || 0) + 1;
       }
 
-      if (record.category && record.category !== 'Maternity') {
+      if (record.category && record.category !== 'Maternity' && record.category !== 'Shift') {
         const cat = record.category.toLowerCase().includes('not inform') ? 'Not inform leave' : record.category;
         
         categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
