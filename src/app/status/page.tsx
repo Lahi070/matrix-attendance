@@ -40,7 +40,7 @@ export default async function DailyStatus() {
   // Fetch detailed attendance for today (for dashboard summary)
   const { data: attendance } = await supabase
     .from('attendance')
-    .select('module_id, status, category, reason_id, team_members(gender, role)')
+    .select('module_id, status, category, reason_id, team_members(name, epf, gender, role)')
     .eq('date', today);
 
   // Build a moduleId → moduleName lookup from already-fetched modules data
@@ -189,6 +189,7 @@ export default async function DailyStatus() {
   const directCounts: Record<string, number> = { ...categoryCounts };
   const indirectCounts: Record<string, number> = { ...categoryCounts };
   const informLeaveReasons: Record<string, number> = {};
+  const detailedAbsentees: any[] = [];
 
   const cadreCountByModule = (teamMembers || []).reduce((acc: Record<string, number>, member) => {
     if (!excludedRoles.includes(member.role || '')) {
@@ -255,11 +256,20 @@ export default async function DailyStatus() {
         } else if (!role || !excludedRoles.includes(role)) {
           directCounts[cat] = (directCounts[cat] || 0) + 1;
         }
+
+        detailedAbsentees.push({
+          epf: teamMember?.epf || 'N/A',
+          name: teamMember?.name || 'Unknown',
+          moduleName,
+          category: cat,
+          reasonId: record.reason_id,
+          isIndirect: isIndirectEmployee
+        });
       }
     });
   }
 
-  const { data: reasonsData } = await supabase.from('absence_reasons').select('id, reason_text').eq('category', 'Inform leave');
+  const { data: reasonsData } = await supabase.from('absence_reasons').select('id, reason_text');
   const reasonMap: Record<string, string> = {};
   reasonsData?.forEach(r => {
     reasonMap[r.id] = r.reason_text;
@@ -394,7 +404,9 @@ export default async function DailyStatus() {
           <AbsenceBreakdownPanel 
             totalCounts={categoryCounts} 
             directCounts={directCounts} 
-            indirectCounts={indirectCounts} 
+            indirectCounts={indirectCounts}
+            detailedAbsentees={detailedAbsentees}
+            reasonMap={reasonMap}
           />
         </div>
 
