@@ -4,6 +4,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Search, ArrowRightLeft, CheckCircle2, UserCircle, Plus, Trash2 } from 'lucide-react';
+import ManualAttendance from './ManualAttendance';
 
 export default function MembersPage() {
   const [members, setMembers] = useState<any[]>([]);
@@ -144,8 +145,10 @@ export default function MembersPage() {
     <div className="space-y-8 font-sans max-w-6xl">
       <div className="relative z-10">
         <h1 className="text-3xl font-extrabold text-white tracking-tight mb-2">Manage Members</h1>
-        <p className="text-slate-400 font-medium">Add new members or transfer existing ones between modules.</p>
+        <p className="text-slate-400 font-medium">Add new members, transfer existing ones, or mark manual attendance.</p>
       </div>
+
+      <ManualAttendance />
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 relative z-10">
         
