@@ -49,8 +49,8 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons,
   const categories = ['Planning leave', 'Inform leave', 'Maternity', 'Not inform leave', 'Dutypay', 'Half day', 'Shift'];
 
   const getFilteredReasons = (category: string) => {
-    // No specific reasons needed for Maternity, Shift, or Dutypay - just the category is enough.
-    if (category === 'Maternity' || category === 'Shift' || category === 'Dutypay') {
+    // No specific reasons needed for Maternity or Shift - just the category is enough.
+    if (category === 'Maternity' || category === 'Shift') {
       return [];
     }
 
@@ -58,7 +58,7 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons,
       return reasons.filter(r => r.category === 'Inform leave' && !r.reason_text.toLowerCase().includes('maternity'));
     }
 
-    if (category === 'Planning leave') {
+    if (category === 'Planning leave' || category === 'Dutypay') {
       const ownReasons = reasons.filter(r => r.category === category);
       const informReasons = reasons.filter(r => r.category === 'Inform leave' && !r.reason_text.toLowerCase().includes('maternity'));
       
