@@ -104,6 +104,47 @@ export default function AbsenceBreakdownPanel({
     const fileName = `${selectedCategory}_Absentees_${filter}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
+  const exportTotalToExcel = () => {
+    if (detailedAbsentees.length === 0) return;
+
+    // Filter by the current Total/Direct/Indirect dropdown
+    const absenteesToExport = detailedAbsentees.filter(member => {
+      if (filter === 'direct' && member.isIndirect) return false;
+      if (filter === 'indirect' && !member.isIndirect) return false;
+      return true;
+    });
+
+    if (absenteesToExport.length === 0) return;
+
+    const data = absenteesToExport.map((m, index) => ({
+      'No.': index + 1,
+      'EPF Number': m.epf,
+      'Name': m.name,
+      'Module': m.moduleName,
+      'Category': m.category,
+      'Reason': m.reasonId ? (reasonMap[m.reasonId] || 'N/A') : 'N/A',
+      'Type': m.isIndirect ? 'Indirect' : 'Direct'
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(data);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "All_Absentees");
+    
+    // Auto-size columns
+    const wscols = [
+      { wch: 5 }, // No.
+      { wch: 15 }, // EPF
+      { wch: 30 }, // Name
+      { wch: 20 }, // Module
+      { wch: 20 }, // Category
+      { wch: 30 }, // Reason
+      { wch: 10 }, // Type
+    ];
+    worksheet['!cols'] = wscols;
+
+    const fileName = `Total_Absentees_${filter}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+  };
 
   return (
     <>
@@ -112,15 +153,25 @@ export default function AbsenceBreakdownPanel({
           <h2 className="text-lg font-bold text-slate-200">
             Absence Breakdown
           </h2>
-          <select 
-            value={filter}
-            onChange={(e) => setFilter(e.target.value as 'total' | 'direct' | 'indirect')}
-            className="bg-slate-800/80 border border-slate-600/50 text-slate-200 text-sm rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-colors"
-          >
-            <option value="total">Total</option>
-            <option value="direct">Direct</option>
-            <option value="indirect">Indirect</option>
-          </select>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={exportTotalToExcel}
+              className="flex items-center gap-1.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1 rounded-lg text-xs font-semibold transition-colors"
+              title="Download Total Absentees"
+            >
+              <Download className="w-3.5 h-3.5" />
+              Excel
+            </button>
+            <select 
+              value={filter}
+              onChange={(e) => setFilter(e.target.value as 'total' | 'direct' | 'indirect')}
+              className="bg-slate-800/80 border border-slate-600/50 text-slate-200 text-sm rounded-lg px-2 py-1 outline-none focus:border-blue-500 transition-colors"
+            >
+              <option value="total">Total</option>
+              <option value="direct">Direct</option>
+              <option value="indirect">Indirect</option>
+            </select>
+          </div>
         </div>
         
         <div className="space-y-2 relative z-10 overflow-y-auto pr-2 custom-scrollbar flex-grow">
