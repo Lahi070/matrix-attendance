@@ -97,6 +97,7 @@ export default async function DailyStatus() {
   const pending = total - marked;
   
   // Dashboard Summary Data Processing
+  let totalAbsent = 0;
   let maleAbsent = 0;
   let femaleAbsent = 0;
   let directAbsent = 0;
@@ -232,6 +233,7 @@ export default async function DailyStatus() {
 
       // Exclude Maternity and Shift from total absence count
       if (record.category !== 'Maternity' && record.category !== 'Shift') {
+        totalAbsent++;
         if (gender === 'Male') maleAbsent++;
         if (gender === 'Female') femaleAbsent++;
 
@@ -375,7 +377,7 @@ export default async function DailyStatus() {
             
             {(() => {
               const activeTotalForAbsence = manualCadre > 0 ? manualCadre : dbTotal || 0;
-              const totalAbs = maleAbsent + femaleAbsent;
+              const totalAbs = totalAbsent;
               const absencePercentage = activeTotalForAbsence > 0 ? (totalAbs / activeTotalForAbsence) * 100 : 0;
               const isHigh = absencePercentage > 5.6;
               const colorBg = isHigh ? 'bg-red-900/20' : 'bg-emerald-900/20';
