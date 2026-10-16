@@ -354,6 +354,7 @@ export default async function DailyStatus() {
               dbTotal={dbTotal || 0} 
               manualCadre={manualCadre} 
               moduleNameById={moduleNameById} 
+              reasonMap={reasonMap}
             />
             <Link href="/" className="bg-[#111827]/80 backdrop-blur-xl border border-slate-700/50 hover:border-slate-500 text-slate-300 px-5 py-2.5 rounded-xl transition-all text-sm font-semibold flex items-center gap-2 shadow-lg">
               <ArrowLeft className="w-4 h-4" />
@@ -407,6 +408,7 @@ export default async function DailyStatus() {
             indirectCounts={indirectCounts}
             detailedAbsentees={detailedAbsentees}
             reasonMap={reasonMap}
+            selectedDate={today}
           />
         </div>
 

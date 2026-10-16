@@ -3,23 +3,26 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { Calendar, X, Activity } from 'lucide-react';
-import AbsenceBreakdownPanel from './AbsenceBreakdownPanel';
+import AbsenceBreakdownPanel, { AbsentMemberDetail } from './AbsenceBreakdownPanel';
 
 type HistoricalModalProps = {
   dbTotal: number;
   manualCadre: number;
   moduleNameById: Record<string, string>;
+  reasonMap?: Record<string, string>;
 };
 
-export default function HistoricalModal({ dbTotal, manualCadre, moduleNameById }: HistoricalModalProps) {
+export default function HistoricalModal({ dbTotal, manualCadre, moduleNameById, reasonMap }: HistoricalModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [date, setDate] = useState('');
   const [loading, setLoading] = useState(false);
+  const [reasons, setReasons] = useState<Record<string, string>>(reasonMap || {});
   const [data, setData] = useState<{
     totalAbsent: number;
     categoryCounts: Record<string, number>;
     directCounts: Record<string, number>;
     indirectCounts: Record<string, number>;
+    detailedAbsentees: AbsentMemberDetail[];
   } | null>(null);
 
   const activeCadre = manualCadre > 0 ? manualCadre : dbTotal;
@@ -36,21 +39,52 @@ export default function HistoricalModal({ dbTotal, manualCadre, moduleNameById }
 
   const excludedRoles = ['DGM', 'AM', 'Executive', 'Senior Executive'];
 
+  // Ensure reasonMap is populated
   useEffect(() => {
-    if (!date) return;
+    if (reasonMap && Object.keys(reasonMap).length > 0) {
+      setReasons(reasonMap);
+      return;
+    }
+    let isMounted = true;
+    async function fetchReasons() {
+      const { data: reasonsData } = await supabase.from('absence_reasons').select('id, reason_text');
+      if (isMounted && reasonsData) {
+        const rMap: Record<string, string> = {};
+        reasonsData.forEach(r => {
+          rMap[r.id] = r.reason_text;
+        });
+        setReasons(rMap);
+      }
+    }
+    fetchReasons();
+    return () => { isMounted = false; };
+  }, [reasonMap]);
+
+  useEffect(() => {
+    if (!date) {
+      setData(null);
+      return;
+    }
     let isMounted = true;
 
     async function fetchData() {
       setLoading(true);
       const { data: attendance } = await supabase
         .from('attendance')
-        .select('status, category, module_id, team_members(role)')
-        .eq('date', date);
+        .select('status, category, module_id, reason_id, team_members(name, epf, gender, role)')
+        .eq('date', date)
+        .limit(10000);
 
       if (!isMounted) return;
 
       if (!attendance) {
-        setData({ totalAbsent: 0, categoryCounts: {}, directCounts: {}, indirectCounts: {} });
+        setData({
+          totalAbsent: 0,
+          categoryCounts: {},
+          directCounts: {},
+          indirectCounts: {},
+          detailedAbsentees: []
+        });
         setLoading(false);
         return;
       }
@@ -66,14 +100,17 @@ export default function HistoricalModal({ dbTotal, manualCadre, moduleNameById }
       const catCounts: Record<string, number> = { ...defaultCategories };
       const dirCounts: Record<string, number> = { ...defaultCategories };
       const indCounts: Record<string, number> = { ...defaultCategories };
+      const detAbsentees: AbsentMemberDetail[] = [];
 
       attendance.filter(a => a.status === 'Absent').forEach(record => {
         const tm = Array.isArray(record.team_members) ? record.team_members[0] : record.team_members;
         const role = (tm as any)?.role;
+        const name = (tm as any)?.name || 'Unknown';
+        const epf = (tm as any)?.epf || 'N/A';
         const moduleName = moduleNameById[record.module_id || ''] || '';
         const isIndirectEmployee = isIndirect(moduleName, role);
 
-        if (record.category !== 'Maternity') {
+        if (record.category !== 'Maternity' && record.category !== 'Shift') {
           tAbsent++;
           
           if (record.category) {
@@ -84,6 +121,15 @@ export default function HistoricalModal({ dbTotal, manualCadre, moduleNameById }
             } else if (!role || !excludedRoles.includes(role)) {
               dirCounts[cat] = (dirCounts[cat] || 0) + 1;
             }
+
+            detAbsentees.push({
+              epf,
+              name,
+              moduleName,
+              category: cat,
+              reasonId: (record as any).reason_id || null,
+              isIndirect: isIndirectEmployee
+            });
           }
         }
       });
@@ -92,7 +138,8 @@ export default function HistoricalModal({ dbTotal, manualCadre, moduleNameById }
         totalAbsent: tAbsent,
         categoryCounts: catCounts,
         directCounts: dirCounts,
-        indirectCounts: indCounts
+        indirectCounts: indCounts,
+        detailedAbsentees: detAbsentees
       });
       setLoading(false);
     }
@@ -191,6 +238,9 @@ export default function HistoricalModal({ dbTotal, manualCadre, moduleNameById }
                     totalCounts={data.categoryCounts} 
                     directCounts={data.directCounts} 
                     indirectCounts={data.indirectCounts} 
+                    detailedAbsentees={data.detailedAbsentees}
+                    reasonMap={reasons}
+                    selectedDate={date}
                   />
                 </div>
               )}

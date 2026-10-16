@@ -6,7 +6,7 @@ import { X, Download } from 'lucide-react';
 
 type CategoryCounts = Record<string, number>;
 
-interface AbsentMemberDetail {
+export interface AbsentMemberDetail {
   epf: string;
   name: string;
   moduleName: string;
@@ -15,12 +15,13 @@ interface AbsentMemberDetail {
   isIndirect: boolean;
 }
 
-interface AbsenceBreakdownPanelProps {
+export interface AbsenceBreakdownPanelProps {
   totalCounts: CategoryCounts;
   directCounts: CategoryCounts;
   indirectCounts: CategoryCounts;
   detailedAbsentees?: AbsentMemberDetail[];
   reasonMap?: Record<string, string>;
+  selectedDate?: string;
 }
 
 export default function AbsenceBreakdownPanel({ 
@@ -28,7 +29,8 @@ export default function AbsenceBreakdownPanel({
   directCounts, 
   indirectCounts,
   detailedAbsentees = [],
-  reasonMap = {}
+  reasonMap = {},
+  selectedDate
 }: AbsenceBreakdownPanelProps) {
   const [filter, setFilter] = useState<'total' | 'direct' | 'indirect'>('total');
   
@@ -46,17 +48,17 @@ export default function AbsenceBreakdownPanel({
   const getFilteredAbsentees = () => {
     if (!selectedCategory) return [];
     
-    const catLower = selectedCategory.toLowerCase();
+    const catLower = selectedCategory.toLowerCase().trim();
     const isNotInform = catLower.includes('not inform');
 
     return detailedAbsentees.filter(member => {
       // 1. Filter by category
-      const memberCatLower = member.category.toLowerCase();
+      const memberCatLower = (member.category || '').toLowerCase().trim();
       let matchesCat = false;
       
       if (isNotInform && memberCatLower.includes('not inform')) {
         matchesCat = true;
-      } else if (member.category === selectedCategory) {
+      } else if (memberCatLower === catLower) {
         matchesCat = true;
       }
 
@@ -77,6 +79,7 @@ export default function AbsenceBreakdownPanel({
 
     const data = filteredAbsentees.map((m, index) => ({
       'No.': index + 1,
+      ...(selectedDate ? { 'Date': selectedDate } : {}),
       'EPF Number': m.epf,
       'Name': m.name,
       'Module': m.moduleName,
@@ -92,6 +95,7 @@ export default function AbsenceBreakdownPanel({
     // Auto-size columns
     const wscols = [
       { wch: 5 }, // No.
+      ...(selectedDate ? [{ wch: 12 }] : []), // Date
       { wch: 15 }, // EPF
       { wch: 30 }, // Name
       { wch: 20 }, // Module
@@ -101,12 +105,13 @@ export default function AbsenceBreakdownPanel({
     ];
     worksheet['!cols'] = wscols;
 
-    const fileName = `${selectedCategory}_Absentees_${filter}.xlsx`;
+    const cleanCategory = (selectedCategory || 'Category').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const datePrefix = selectedDate ? `${selectedDate}_` : '';
+    const fileName = `${datePrefix}${cleanCategory}_Absentees_${filter}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
-  const exportTotalToExcel = () => {
-    if (detailedAbsentees.length === 0) return;
 
+  const exportTotalToExcel = () => {
     // Filter by the current Total/Direct/Indirect dropdown
     const absenteesToExport = detailedAbsentees.filter(member => {
       if (filter === 'direct' && member.isIndirect) return false;
@@ -114,10 +119,14 @@ export default function AbsenceBreakdownPanel({
       return true;
     });
 
-    if (absenteesToExport.length === 0) return;
+    if (absenteesToExport.length === 0) {
+      alert('No absentee data to export.');
+      return;
+    }
 
     const data = absenteesToExport.map((m, index) => ({
       'No.': index + 1,
+      ...(selectedDate ? { 'Date': selectedDate } : {}),
       'EPF Number': m.epf,
       'Name': m.name,
       'Module': m.moduleName,
@@ -133,6 +142,7 @@ export default function AbsenceBreakdownPanel({
     // Auto-size columns
     const wscols = [
       { wch: 5 }, // No.
+      ...(selectedDate ? [{ wch: 12 }] : []), // Date
       { wch: 15 }, // EPF
       { wch: 30 }, // Name
       { wch: 20 }, // Module
@@ -142,7 +152,8 @@ export default function AbsenceBreakdownPanel({
     ];
     worksheet['!cols'] = wscols;
 
-    const fileName = `Total_Absentees_${filter}.xlsx`;
+    const datePrefix = selectedDate ? `${selectedDate}_` : '';
+    const fileName = `${datePrefix}Total_Absentees_${filter}.xlsx`;
     XLSX.writeFile(workbook, fileName);
   };
 
@@ -218,8 +229,14 @@ export default function AbsenceBreakdownPanel({
 
       {/* Modal for Detailed View */}
       {selectedCategory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200">
+        <div 
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          onClick={() => setSelectedCategory(null)}
+        >
+          <div 
+            className="bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col animate-in fade-in zoom-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
             <div className="flex items-center justify-between p-5 border-b border-slate-800">
               <h3 className="text-xl font-bold text-white flex items-center gap-3">
