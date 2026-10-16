@@ -91,7 +91,7 @@ export default function EditModule({ params }: { params: Promise<{ id: string }>
     
     const { error, data } = await supabase
       .from('team_members')
-      .update({ module_id: moduleId, role: assignRole, worker_type: assignWorkerType })
+      .update({ module_id: moduleId, role: assignRole })
       .eq('id', foundMember.id)
       .select('*');
 

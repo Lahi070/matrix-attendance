@@ -15,14 +15,9 @@ export default function MembersPage() {
   const [epf, setEpf] = useState('');
   const [gender, setGender] = useState('Female');
   const [role, setRole] = useState('Team Member');
-  const [workerType, setWorkerType] = useState('Direct');
-
-  useEffect(() => {
-    if (role === 'Team Member') setWorkerType('Direct');
-    else setWorkerType('Indirect');
-  }, [role]);
   const [moduleId, setModuleId] = useState('');
   const [isAdding, setIsAdding] = useState(false);
+  const [addMessage, setAddMessage] = useState<{ type: 'error' | 'success', text: string } | null>(null);
 
   // Transfer State
   const [searchEpf, setSearchEpf] = useState('');
@@ -55,19 +50,62 @@ export default function MembersPage() {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !epf || !moduleId) return;
+    setAddMessage(null);
+
+    const trimmedName = name.trim();
+    const trimmedEpf = epf.trim();
+
+    if (!trimmedName || !trimmedEpf || !moduleId) {
+      setAddMessage({ type: 'error', text: 'Please fill in Name, EPF, and select a Module.' });
+      return;
+    }
+
+    // Check if member already exists in local list
+    const existing = members.find(m => m.epf?.toString().trim() === trimmedEpf);
+    if (existing) {
+      const errText = `Member with EPF "${trimmedEpf}" already exists in module "${existing.modules?.name || 'Unknown'}". Use the Transfer Member section to change their module.`;
+      setAddMessage({ type: 'error', text: errText });
+      alert(errText);
+      return;
+    }
+
     setIsAdding(true);
-    
-    const { error, data } = await supabase.from('team_members').insert([
-      { name, epf, gender, role, module_id: moduleId, worker_type: workerType }
-    ]).select('*, modules(name)');
-    
+
+    const payload = {
+      name: trimmedName,
+      epf: trimmedEpf,
+      gender,
+      role,
+      module_id: moduleId
+    };
+
+    const { error, data } = await supabase
+      .from('team_members')
+      .insert([payload])
+      .select();
+
     setIsAdding(false);
-    if (!error && data) {
-      setName(''); setEpf('');
-      setMembers(prev => [data[0], ...prev]);
-    } else {
-      alert(error?.message || 'Error adding member');
+
+    if (error) {
+      console.error('Error adding team member:', error);
+      let errorText = error.message || 'Error adding member';
+      if (error.message?.includes('row-level security') || error.code === '42501') {
+        errorText = 'Database permission error (RLS). Please ensure "fix_rls.sql" has been run in Supabase SQL Editor.';
+      } else if (error.message?.includes('unique') || error.message?.includes('duplicate') || error.code === '23505') {
+        errorText = `Member with EPF "${trimmedEpf}" already exists in the database. Use Transfer Member instead.`;
+      }
+      setAddMessage({ type: 'error', text: errorText });
+      alert(errorText);
+      return;
+    }
+
+    if (data && data[0]) {
+      const assignedMod = modules.find(m => m.id === moduleId);
+      const newMember = { ...data[0], modules: { name: assignedMod?.name || '' } };
+      setName('');
+      setEpf('');
+      setAddMessage({ type: 'success', text: `Member "${trimmedName}" (EPF: ${trimmedEpf}) added successfully!` });
+      setMembers(prev => [newMember, ...prev]);
     }
   };
 
@@ -230,6 +268,11 @@ export default function MembersPage() {
             </div>
             Add New Member
           </h2>
+          {addMessage && (
+            <div className={`p-4 rounded-xl mb-5 text-sm font-bold shadow-sm relative z-10 border ${addMessage.type === 'error' ? 'bg-pink-500/10 text-pink-400 border-pink-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'}`}>
+              {addMessage.text}
+            </div>
+          )}
           <form onSubmit={handleAdd} className="space-y-5 relative z-10">
             <div className="grid grid-cols-2 gap-5">
               <div>
