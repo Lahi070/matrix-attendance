@@ -14,7 +14,7 @@ import {
 } from 'recharts';
 
 export default function WeeklyAbsenceChart({ data, currentWeek }: { data: { week: string, percentage: number }[], currentWeek?: string }) {
-  const [weeksToShow, setWeeksToShow] = useState<number>(24);
+  const [weeksToShow, setWeeksToShow] = useState<number>(12);
   const displayData = data.slice(-weeksToShow);
 
   return (

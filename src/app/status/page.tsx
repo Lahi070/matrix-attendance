@@ -51,16 +51,13 @@ export default async function DailyStatus() {
   const historicalAttendance: { date: string; status: string; category?: string | null }[] = [];
   const pageSize = 1000;
   let from = 0;
-  const thirtyWeeksAgo = new Date();
-  thirtyWeeksAgo.setDate(thirtyWeeksAgo.getDate() - 30 * 7);
-  const thirtyWeeksAgoStr = thirtyWeeksAgo.toISOString().split('T')[0];
 
   while (true) {
     const { data: pageData, error: pageErr } = await supabase
       .from('attendance')
       .select('date, status, category')
-      .gte('date', thirtyWeeksAgoStr)
       .order('date', { ascending: true })
+      .order('id', { ascending: true })
       .range(from, from + pageSize - 1);
 
     if (pageErr || !pageData || pageData.length === 0) break;
