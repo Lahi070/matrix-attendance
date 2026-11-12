@@ -28,14 +28,22 @@ export default function ReportsPage() {
       return;
     }
 
-    // 2. Fetch attendance records in date range
-    const { data: attendance } = await supabase
-      .from('attendance')
-      .select('member_id, status, category')
-      .gte('date', startDate)
-      .lte('date', endDate);
-
-    const records = attendance || [];
+    // 2. Fetch attendance records in date range with pagination
+    let records: any[] = [];
+    let from = 0;
+    const pageSize = 1000;
+    while (true) {
+      const { data: batch, error: bErr } = await supabase
+        .from('attendance')
+        .select('member_id, status, category')
+        .gte('date', startDate)
+        .lte('date', endDate)
+        .range(from, from + pageSize - 1);
+      if (bErr || !batch || batch.length === 0) break;
+      records.push(...batch);
+      if (batch.length < pageSize) break;
+      from += pageSize;
+    }
 
     // 3. Aggregate data
     const aggregatedData = members.map((member, index) => {

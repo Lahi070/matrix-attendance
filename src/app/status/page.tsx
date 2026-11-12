@@ -47,11 +47,27 @@ export default async function DailyStatus() {
   const moduleNameById: Record<string, string> = {};
   (rawModules || []).forEach(m => { moduleNameById[m.id] = m.name; });
 
-  // Fetch historical attendance for the last 12 weeks (and all data for daily stats)
-  const { data: historicalAttendance } = await supabase
-    .from('attendance')
-    .select('date, status')
-    .limit(100000);
+  // Fetch historical attendance records with pagination so PostgREST 1000-row limit does not truncate weeks
+  const historicalAttendance: { date: string; status: string; category?: string | null }[] = [];
+  const pageSize = 1000;
+  let from = 0;
+  const thirtyWeeksAgo = new Date();
+  thirtyWeeksAgo.setDate(thirtyWeeksAgo.getDate() - 30 * 7);
+  const thirtyWeeksAgoStr = thirtyWeeksAgo.toISOString().split('T')[0];
+
+  while (true) {
+    const { data: pageData, error: pageErr } = await supabase
+      .from('attendance')
+      .select('date, status, category')
+      .gte('date', thirtyWeeksAgoStr)
+      .order('date', { ascending: true })
+      .range(from, from + pageSize - 1);
+
+    if (pageErr || !pageData || pageData.length === 0) break;
+    historicalAttendance.push(...pageData);
+    if (pageData.length < pageSize) break;
+    from += pageSize;
+  }
 
   const { data: teamLeaders } = await supabase
     .from('team_members')
@@ -103,81 +119,92 @@ export default async function DailyStatus() {
   let directAbsent = 0;
   let indirectAbsent = 0;
 
-  // Process historical data for chart
-  const weeklyDataMap = new Map<string, { total: number, absent: number }>();
-  
-  // Calculate current week label
-  const now = new Date();
-  const dNow = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-  const dayNumNow = dNow.getUTCDay() || 7;
-  dNow.setUTCDate(dNow.getUTCDate() + 4 - dayNumNow);
-  const yearStartNow = new Date(Date.UTC(dNow.getUTCFullYear(),0,1));
-  const currentWeekNo = Math.ceil((((dNow.getTime() - yearStartNow.getTime()) / 86400000) + 1)/7);
-  const currentWeekLabel = `W${currentWeekNo}`;
+  // Helper to compute ISO year and week consistently across timezones
+  function getIsoYearAndWeek(dateStrOrObj: string | Date): { year: number; week: number; label: string; key: string } {
+    let date: Date;
+    if (typeof dateStrOrObj === 'string') {
+      const parts = dateStrOrObj.split('T')[0].split('-');
+      if (parts.length === 3) {
+        date = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
+      } else {
+        date = new Date(dateStrOrObj);
+      }
+    } else {
+      date = new Date(Date.UTC(dateStrOrObj.getFullYear(), dateStrOrObj.getMonth(), dateStrOrObj.getDate()));
+    }
+    const dayNum = date.getUTCDay() || 7;
+    date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+    const year = date.getUTCFullYear();
+    const yearStart = new Date(Date.UTC(year, 0, 1));
+    const week = Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+    return { year, week, label: `W${week}`, key: `${year}-W${week}` };
+  }
 
-  // Pre-fill the last 12 weeks to ensure graph has data points even if no attendance was marked
-  for (let i = 11; i >= 0; i--) {
+  // Calculate current week label
+  const currentWeekInfo = getIsoYearAndWeek(new Date());
+  const currentWeekLabel = currentWeekInfo.label;
+
+  // Process historical data for chart
+  const weeklyDataMap = new Map<string, { year: number; week: number; label: string; total: number; absent: number }>();
+
+  // Pre-fill the last 24 weeks in chronological order
+  for (let i = 23; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i * 7);
-    const dateObj = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-    const dayNum = dateObj.getUTCDay() || 7;
-    dateObj.setUTCDate(dateObj.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(dateObj.getUTCFullYear(),0,1));
-    const weekNo = Math.ceil((((dateObj.getTime() - yearStart.getTime()) / 86400000) + 1)/7);
-    weeklyDataMap.set(`W${weekNo}`, { total: 0, absent: 0 });
+    const info = getIsoYearAndWeek(d);
+    if (!weeklyDataMap.has(info.key)) {
+      weeklyDataMap.set(info.key, { year: info.year, week: info.week, label: info.label, total: 0, absent: 0 });
+    }
   }
 
   // Process data for daily chart (Monday to Friday)
   const dailyData: { month: string, day: string, total: number, absent: number }[] = [];
   const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
   const monthsOfYear = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-  
-  if (historicalAttendance) {
+
+  if (historicalAttendance && historicalAttendance.length > 0) {
     historicalAttendance.forEach(record => {
-      const dateObj = new Date(record.date);
-      const dayName = daysOfWeek[dateObj.getDay()];
-      const monthName = monthsOfYear[dateObj.getMonth()];
-      
-      if (dayName !== 'Sunday' && dayName !== 'Saturday') {
-        dailyData.push({
-          month: monthName,
-          day: dayName,
-          total: 1,
-          absent: record.status === 'Absent' ? 1 : 0
-        });
+      if (!record.date) return;
+      const info = getIsoYearAndWeek(record.date);
+
+      // Populate daily data for DailyAbsenceChart
+      const parts = record.date.split('T')[0].split('-');
+      if (parts.length === 3) {
+        const dObj = new Date(Date.UTC(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2])));
+        const dayName = daysOfWeek[dObj.getUTCDay()];
+        const monthName = monthsOfYear[dObj.getUTCMonth()];
+        if (dayName !== 'Sunday' && dayName !== 'Saturday') {
+          dailyData.push({
+            month: monthName,
+            day: dayName,
+            total: 1,
+            absent: (record.status === 'Absent' && record.category !== 'Maternity' && record.category !== 'Shift') ? 1 : 0
+          });
+        }
       }
-      // ISO Week calculation
-      const d = new Date(Date.UTC(dateObj.getFullYear(), dateObj.getMonth(), dateObj.getDate()));
-      const dayNum = d.getUTCDay() || 7;
-      d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-      const yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-      const weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1)/7);
-      
-      const weekLabel = `W${weekNo}`;
-      
-      if (!weeklyDataMap.has(weekLabel)) {
-        weeklyDataMap.set(weekLabel, { total: 0, absent: 0 });
+
+      if (!weeklyDataMap.has(info.key)) {
+        weeklyDataMap.set(info.key, { year: info.year, week: info.week, label: info.label, total: 0, absent: 0 });
       }
-      
-      const weekStats = weeklyDataMap.get(weekLabel)!;
+
+      const weekStats = weeklyDataMap.get(info.key)!;
       weekStats.total += 1;
-      if (record.status === 'Absent') {
+      // Exclude Maternity and Shift from total absence count, consistent with daily status
+      if (record.status === 'Absent' && record.category !== 'Maternity' && record.category !== 'Shift') {
         weekStats.absent += 1;
       }
     });
   }
 
-  const weeklyChartData = Array.from(weeklyDataMap.entries())
-    .map(([week, stats]) => ({
-      week,
-      percentage: stats.total > 0 ? Number(((stats.absent / stats.total) * 100).toFixed(1)) : 0
-    }))
-    // Sort by week number
-    .sort((a, b) => {
-      const wA = parseInt(a.week.replace('W', ''));
-      const wB = parseInt(b.week.replace('W', ''));
-      return wA - wB;
-    });
+  const weeklyChartData = Array.from(weeklyDataMap.values())
+    // Exclude weeks with no attendance records so future/unmarked weeks don't pull line to 0
+    .filter(stats => stats.total > 0)
+    // Sort chronologically by year and week
+    .sort((a, b) => (a.year !== b.year ? a.year - b.year : a.week - b.week))
+    .map(stats => ({
+      week: stats.label,
+      percentage: Number(((stats.absent / stats.total) * 100).toFixed(1))
+    }));
 
   const roleCounts: Record<string, number> = {};
   const categoryCounts: Record<string, number> = {
