@@ -6,6 +6,7 @@ import AbsenceBreakdownPanel from './AbsenceBreakdownPanel';
 import WeeklyAbsenceChart from './WeeklyAbsenceChart';
 import DailyAbsenceChart from './DailyAbsenceChart';
 import HistoricalModal from './HistoricalModal';
+import ModuleToggleButton from './ModuleToggleButton';
 import Footer from '@/components/Footer';
 import { resolveModules, stripNewSuffix } from '@/lib/modules';
 
@@ -616,21 +617,7 @@ export default async function DailyStatus() {
                     <form action={toggleModule}>
                       <input type="hidden" name="id" value={mod.id} />
                       <input type="hidden" name="status" value={String(mod.is_active)} />
-                      <button 
-                        type="submit" 
-                        title={mod.is_active ? 'Turn Off Module' : 'Turn On Module'}
-                        className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center justify-center rounded-full outline-none transition-colors duration-200 ease-in-out border border-transparent ${
-                          mod.is_active ? 'bg-emerald-500 hover:bg-emerald-400' : 'bg-slate-600 hover:bg-slate-500'
-                        }`}
-                      >
-                        <span className="sr-only">Toggle Module</span>
-                        <span
-                          aria-hidden="true"
-                          className={`pointer-events-none absolute left-0.5 inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                            mod.is_active ? 'translate-x-4' : 'translate-x-0'
-                          }`}
-                        />
-                      </button>
+                      <ModuleToggleButton isActive={mod.is_active} />
                     </form>
                   </div>
                   <div className="text-[11px] text-slate-300 mb-1 flex items-center justify-between">
