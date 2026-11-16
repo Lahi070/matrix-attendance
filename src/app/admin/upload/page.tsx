@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import * as XLSX from 'xlsx';
 import { UploadCloud, CheckCircle, AlertTriangle, Loader2 } from 'lucide-react';
+import { isLegacyNewName, stripNewSuffix, moduleKey } from '@/lib/modules';
 
 export default function UploadCadrePage() {
   const [file, setFile] = useState<File | null>(null);
@@ -104,8 +105,12 @@ export default function UploadCadrePage() {
       // 1. Get existing modules
       const { data: existingModules } = await supabase.from('modules').select('id, name');
       const moduleMap: Record<string, string> = {};
-      existingModules?.forEach(m => {
-        moduleMap[m.name.trim().toLowerCase()] = m.id;
+      // Legacy "XX NEW" modules first, so plain modules win when both exist
+      const sortedExisting = [...(existingModules || [])].sort(
+        (a, b) => Number(isLegacyNewName(b.name)) - Number(isLegacyNewName(a.name))
+      );
+      sortedExisting.forEach(m => {
+        moduleMap[moduleKey(m.name)] = m.id;
       });
 
       // 2. Process valid rows
@@ -124,8 +129,8 @@ export default function UploadCadrePage() {
 
         if (!epf || !name || !mod) continue;
 
-        const modNameStr = String(mod).trim();
-        const modNameLower = modNameStr.toLowerCase();
+        const modNameStr = stripNewSuffix(String(mod));
+        const modNameLower = moduleKey(modNameStr);
 
         // Skip excluded modules
         let isExcluded = false;
@@ -163,7 +168,7 @@ export default function UploadCadrePage() {
       // 3. Create missing modules
       const excelModules = [...new Set(validRows.map(r => r.modName))];
       for (const modName of excelModules) {
-        const lower = modName.toLowerCase();
+        const lower = moduleKey(modName);
         if (!moduleMap[lower]) {
           addLog(`Creating new module: ${modName}`);
           const { data: newMod, error } = await supabase.from('modules').insert({ name: modName, is_active: true }).select('id').single();

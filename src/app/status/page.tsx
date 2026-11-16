@@ -7,13 +7,14 @@ import WeeklyAbsenceChart from './WeeklyAbsenceChart';
 import DailyAbsenceChart from './DailyAbsenceChart';
 import HistoricalModal from './HistoricalModal';
 import Footer from '@/components/Footer';
+import { resolveModules, stripNewSuffix } from '@/lib/modules';
 
 export const revalidate = 0;
 
 export default async function DailyStatus() {
   const { data: rawModules } = await supabase.from('modules').select('*');
 
-  const modules = rawModules ? [...rawModules].filter(mod => {
+  const modules = rawModules ? resolveModules([...rawModules]).filter(mod => {
     const n = mod.name?.toLowerCase() || '';
     return !n.includes('laying') && !n.includes('needle');
   }).sort((a, b) => {
@@ -45,7 +46,7 @@ export default async function DailyStatus() {
 
   // Build a moduleId → moduleName lookup from already-fetched modules data
   const moduleNameById: Record<string, string> = {};
-  (rawModules || []).forEach(m => { moduleNameById[m.id] = m.name; });
+  (rawModules || []).forEach(m => { moduleNameById[m.id] = stripNewSuffix(m.name); });
 
   // Fetch historical attendance records with pagination so PostgREST 1000-row limit does not truncate weeks
   const historicalAttendance: { date: string; status: string; category?: string | null }[] = [];

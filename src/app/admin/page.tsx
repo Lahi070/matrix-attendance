@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { Users, LayoutGrid, CheckSquare, Activity, UploadCloud, Percent } from 'lucide-react';
 import ManualPercentageCard from './ManualPercentageCard';
 import DownloadCadreButton from './DownloadCadreButton';
+import { resolveModules } from '@/lib/modules';
 
 export const revalidate = 0;
 
@@ -10,10 +11,10 @@ export default async function AdminDashboard() {
   const excludedRoles = ['DGM', 'AM', 'Executive', 'Senior Executive'];
   
   const { data: rawModules } = await supabase.from('modules').select('id, name, is_active');
-  const allValidModules = rawModules?.filter(mod => {
+  const allValidModules = resolveModules(rawModules || []).filter(mod => {
     const n = mod.name?.toLowerCase() || '';
     return !n.includes('laying') && !n.includes('needle');
-  }) || [];
+  });
   const moduleCount = allValidModules.length;
   const activeModuleCount = allValidModules.filter(m => m.is_active).length;
   const activeModuleIds = new Set(allValidModules.filter(m => m.is_active).map(m => m.id));

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { ChevronRight, Activity, Settings } from 'lucide-react';
 import Footer from '@/components/Footer';
+import { resolveModules } from '@/lib/modules';
 
 export const revalidate = 0; // Disable caching
 
@@ -11,7 +12,7 @@ export default async function Home() {
     .from('modules')
     .select('*');
 
-  const modules = rawModules ? [...rawModules].sort((a, b) => {
+  const modules = rawModules ? resolveModules([...rawModules]).sort((a, b) => {
     const matchA = a.name.match(/^(\d+)/);
     const matchB = b.name.match(/^(\d+)/);
     if (matchA && matchB) {
