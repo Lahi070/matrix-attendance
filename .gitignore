@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# spreadsheets (prevent accidental commit of cadre files)
+*.xlsx
+*.xls
+*.XLSX
+*.XLS
