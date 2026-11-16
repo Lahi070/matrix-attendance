@@ -571,7 +571,10 @@ export default async function DailyStatus() {
           {modules
             ?.filter(mod => {
               const n = mod.name?.toLowerCase() || '';
-              return !n.includes('laying') && !n.includes('needle');
+              if (n.includes('laying') || n.includes('needle')) return false;
+              const cadreCount = cadreCountByModule[mod.id] || 0;
+              if (!mod.is_active && cadreCount === 0) return false;
+              return true;
             })
             .map((mod) => {
             const isMarked = markedModules.has(mod.id);
