@@ -217,12 +217,14 @@ export default async function DailyStatus() {
   const informLeaveReasons: Record<string, number> = {};
   const detailedAbsentees: any[] = [];
 
-  const cadreCountByModule = (teamMembers || []).reduce((acc: Record<string, number>, member) => {
+  const cadreCountByModule = (teamMembersRaw || []).reduce((acc: Record<string, number>, member) => {
     if (!excludedRoles.includes(member.role || '')) {
-      // Role counts for summary
-      roleCounts[member.role] = (roleCounts[member.role] || 0) + 1;
-      
-      // Cadre counts by module
+      // Role counts for summary (active modules only)
+      if (member.module_id && activeModuleIds.has(member.module_id)) {
+        roleCounts[member.role] = (roleCounts[member.role] || 0) + 1;
+      }
+
+      // Cadre counts by module (include inactive/Off Shift modules so they remain visible & toggleable)
       if (member.module_id) {
         acc[member.module_id] = (acc[member.module_id] || 0) + 1;
       }
