@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { ChevronRight, Activity, Settings } from 'lucide-react';
 import Footer from '@/components/Footer';
+import DailyStatusButton from '@/components/DailyStatusButton';
 import { resolveModules } from '@/lib/modules';
 
 export const revalidate = 0; // Disable caching
@@ -104,10 +105,7 @@ export default async function Home() {
         
         <div className="flex flex-col gap-4 mb-10">
           <div className="pb-6 mb-2 border-b border-slate-800/80 flex flex-col sm:flex-row justify-between gap-4">
-             <Link href="/status" className="flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white px-6 py-3 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)]">
-               <Activity className="w-5 h-5" />
-               Daily Status
-             </Link>
+             <DailyStatusButton />
              <Link href="/admin" className="flex items-center justify-center gap-2 bg-[#1f2937]/80 border border-slate-700 hover:border-slate-500 text-slate-300 px-6 py-3 rounded-xl text-sm font-bold transition-all hover:bg-[#1f2937]">
                <Settings className="w-5 h-5" />
                Admin Login

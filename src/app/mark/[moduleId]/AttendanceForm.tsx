@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AlertCircle, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import HomeButton from '@/components/HomeButton';
 
 type Member = { id: string; name: string; epf: string; gender: string; role: string };
 type Reason = { id: string; category: string; reason_text: string };
@@ -175,10 +176,10 @@ export default function AttendanceForm({ moduleId, moduleName, members, reasons,
               ATTENDANCE &bull; {new Date().toLocaleDateString('en-GB')}
             </p>
           </div>
-          <Link href="/" className="relative z-10 bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-600 px-4 py-2 rounded-lg transition-colors text-sm font-semibold flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Back
-          </Link>
+          <HomeButton 
+            label="Back" 
+            className="relative z-10 bg-slate-800/80 hover:bg-slate-700 text-slate-200 border border-slate-600 px-4 py-2 rounded-lg transition-colors text-sm font-semibold flex items-center gap-2" 
+          />
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 md:p-10 bg-transparent">
